@@ -6,6 +6,7 @@
 #include "SelectionEllipsoid.h"
 #include "SelectionTree.h"
 #include "TrackingWindow.h"
+#include "FMRIWindow.h"
 #include "../Logger.h"
 #include "../main.h"
 #include "../dataset/Anatomy.h"

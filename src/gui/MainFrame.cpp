@@ -12,6 +12,7 @@
 #include "SelectionTree.h"
 #include "ToolBar.h"
 #include "TrackingWindow.h"
+#include "FMRIWindow.h"
 #include "../main.h"
 #include "../Logger.h"
 #include "../dataset/Anatomy.h"
@@ -339,9 +340,14 @@ void MainFrame::initLayout()
     m_pTrackingWindowHardi->SetScrollbars( 10, 10, 50, 50 );
     m_pTrackingWindowHardi->EnableScrolling( true, true );
 
+	m_pFMRIWindow = new FMRIWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT )); // Contains realtime tracking properties
+    m_pFMRIWindow->SetScrollbars( 10, 10, 50, 50 );
+    m_pFMRIWindow->EnableScrolling( true, true );
+
     m_tab->AddPage( m_pPropertiesWindow, wxT( "Properties" ) );
     m_tab->AddPage( m_pTrackingWindow, wxT( "DTI tracking" ) );
     m_tab->AddPage( m_pTrackingWindowHardi, wxT( "HARDI tracking" ) );
+	m_tab->AddPage( m_pFMRIWindow, wxT( "fMRI networks" ) );
 
     pBoxTab->Add( m_tab, 1, wxEXPAND | wxALL, 2 );
 

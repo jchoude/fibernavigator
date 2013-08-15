@@ -116,7 +116,7 @@ TrackingWindow::TrackingWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id
     /********************************/
 
     m_pBtnSelectFile = new wxButton( this, wxID_ANY,wxT("Peaks not selected"), wxPoint(30,0), wxSize(115, -1) );
-    Connect( m_pBtnSelectFile->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectFileHARDI) );
+	pMf->Connect( m_pBtnSelectFile->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(TrackingWindow::OnSelectFileHARDI) );
     m_pBtnSelectFile->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
     m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start tracking"), wxPoint(130,0), wxSize(115, -1) );
