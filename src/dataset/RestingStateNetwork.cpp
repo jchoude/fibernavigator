@@ -90,6 +90,11 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
         m_signal[i].insert( m_signal[i].end(), it, it + m_bands );
     }
 
+	for(int s = 0; s < size; s++)
+	{
+		data.push_back(m_signal[s].at(0));
+	}
+
     return true;
 }
 

@@ -61,6 +61,7 @@ void FMRIWindow::SetSelectButton()
 {
 	m_pBtnSelectFMRI->SetLabel( wxT("Done") );
     m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
+
 }
 
 void FMRIWindow::OnSelectFMRI( wxCommandEvent& WXUNUSED(event) )

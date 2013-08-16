@@ -402,8 +402,8 @@ void PropertiesWindow::OnSliderIntensityThresholdMoved( wxCommandEvent& WXUNUSED
         {
             CIsoSurface* s = (CIsoSurface*)l_current;
             s->GenerateWithThreshold();
-			RTTrackingHelper::getInstance()->setRTTDirty( true );
-            
+
+			RTTrackingHelper::getInstance()->setRTTDirty( true ); 
             std::vector< Vector > positions = s->m_tMesh->getVerts();
             float shellSeedNb = positions.size();
             m_pMainFrame->m_pTrackingWindow->m_pTxtTotalSeedNbBox->SetValue(wxString::Format( wxT( "%.1f"), shellSeedNb) );

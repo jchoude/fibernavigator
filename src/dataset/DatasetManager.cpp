@@ -607,8 +607,10 @@ DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_i
         pAnatomy->setUseTex( USE_TEX );
 		wxString givenName = wxT("Network");
 		pAnatomy->setName( givenName );
+		pAnatomy->setFloatDataset( pRestingStateNetwork->data );
 
         DatasetIndex index = insert( pAnatomy );
+		pRestingStateNetwork->setNetworkInfo( index );
 
         SelectionTree::SelectionObjectVector objs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
         
@@ -616,10 +618,10 @@ DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_i
         {
             (*objsIt)->update();
         }
-
+		
         return index;
     }
-
+	
     delete pAnatomy;
     return BAD_INDEX;
 }
