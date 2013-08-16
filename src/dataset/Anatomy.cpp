@@ -159,7 +159,7 @@ Anatomy::Anatomy( const int type )
 
         m_floatDataset.resize( m_columns * m_frames * m_rows * 3, 0.0f );
     }
-    else if(type == HEAD_BYTE)
+    else if(type == HEAD_BYTE || OVERLAY)
     {
         m_bands         = 1;
         m_isLoaded      = true;   

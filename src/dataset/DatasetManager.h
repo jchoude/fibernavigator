@@ -122,6 +122,10 @@ private:
 
     // Loads Maximas. Extension supported: .nii and .nii.gz
     DatasetIndex loadMaximas( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+
+	// Loads Resting-state fMRI. Extension supported: .nii and .nii.gz
+    DatasetIndex loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody );
+
     
 private:
     static DatasetManager *m_pInstance;

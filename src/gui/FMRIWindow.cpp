@@ -23,7 +23,7 @@ END_EVENT_TABLE()
 
 
 FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const wxPoint &pos, const wxSize &size)
-:   wxScrolledWindow( pParent, id, pos, size, wxBORDER_NONE, _T("HARDI RTT Canvas") ),
+:   wxScrolledWindow( pParent, id, pos, size, wxBORDER_NONE, _T("fMRI resting-state networks") ),
     m_pMainFrame( pMf )
 {
     SetBackgroundColour( *wxLIGHT_GREY );

@@ -6,6 +6,7 @@
 #include "ODFs.h"
 #include "Tensors.h"
 #include "Maximas.h"
+#include "RestingStateNetwork.h"
 
 #include "../Logger.h"
 #include "../gui/SceneManager.h"
@@ -341,6 +342,17 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                 result = loadMaximas( filename, pHeader, pBody );
             }
         }
+		else if( 4 == pHeader->ndim && 105 == pHeader->dim[4])
+        {
+            if ( m_anatomies.empty() )
+            {
+                Logger::getInstance()->print( wxT( "No anatomy file loaded" ), LOGLEVEL_ERROR );
+            }
+            else
+            {
+                result = loadRestingState( filename, pHeader, pBody );
+            }
+        }
         else
         {
             result = loadAnatomy( filename, pHeader, pBody );
@@ -575,6 +587,38 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
     return BAD_INDEX;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+// Loads a resting-state profile. Extension supported: .nii and .nii.gz
+DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
+{
+    Logger::getInstance()->print( wxT( "Loading resting-state profile" ), LOGLEVEL_MESSAGE );
+	Anatomy *pAnatomy = new Anatomy( OVERLAY );
+	RestingStateNetwork *pRestingStateNetwork = new RestingStateNetwork();
+    if( pRestingStateNetwork->load( pHeader, pBody ) )
+    {
+        Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
+        pAnatomy->setThreshold( THRESHOLD );
+        pAnatomy->setAlpha( ALPHA );
+        pAnatomy->setShow( SHOW );
+        pAnatomy->setShowFS( SHOW_FS );
+        pAnatomy->setUseTex( USE_TEX );
+
+        DatasetIndex index = insert( pAnatomy );
+
+        SelectionTree::SelectionObjectVector objs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+        
+        for( SelectionTree::SelectionObjectVector::iterator objsIt = objs.begin(); objsIt != objs.end(); ++objsIt )
+        {
+            (*objsIt)->update();
+        }
+
+        return index;
+    }
+
+    delete pAnatomy;
+    return BAD_INDEX;
+}
 //////////////////////////////////////////////////////////////////////////
 
 // Loads a fiber set. Extension supported: .fib, .bundlesdata, .trk and .tck
