@@ -31,6 +31,7 @@ public:
     void OnPaint( wxPaintEvent &event );
     void OnSize( wxSizeEvent &event );
     wxSizer* getWindowSizer();
+	void SetSelectButton(); 
 
 public:
 	void OnSelectFMRI                     ( wxCommandEvent& event );

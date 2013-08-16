@@ -605,6 +605,8 @@ DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_i
         pAnatomy->setShow( SHOW );
         pAnatomy->setShowFS( SHOW_FS );
         pAnatomy->setUseTex( USE_TEX );
+		wxString givenName = wxT("Network");
+		pAnatomy->setName( givenName );
 
         DatasetIndex index = insert( pAnatomy );
 

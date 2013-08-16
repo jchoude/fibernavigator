@@ -7,6 +7,7 @@
 #include "../main.h"
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
+#include "../dataset/RestingStateNetwork.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 
@@ -54,6 +55,12 @@ void FMRIWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 wxSizer* FMRIWindow::getWindowSizer()
 {
     return m_pFMRISizer;
+}
+
+void FMRIWindow::SetSelectButton()
+{
+	m_pBtnSelectFMRI->SetLabel( wxT("Done") );
+    m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
 }
 
 void FMRIWindow::OnSelectFMRI( wxCommandEvent& WXUNUSED(event) )

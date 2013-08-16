@@ -443,6 +443,7 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
         return;
     }
     
+	m_pFMRIWindow->SetSelectButton();
     refreshAllGLWidgets();
 }
 
