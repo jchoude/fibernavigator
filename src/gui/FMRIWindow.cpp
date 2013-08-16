@@ -32,7 +32,7 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     SetAutoLayout( true );
 
     m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load resting-state"), wxPoint(30,0), wxSize(115, -1) );
-	pMf->Connect( m_pBtnSelectFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onLoad) );
+	pMf->Connect( m_pBtnSelectFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onLoadAsRestingState) );
     m_pBtnSelectFMRI->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
 	wxBoxSizer *pBoxRow1 = new wxBoxSizer( wxHORIZONTAL );

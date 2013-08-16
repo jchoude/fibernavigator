@@ -35,7 +35,8 @@ DatasetManager * DatasetManager::m_pInstance = NULL;
 DatasetManager::DatasetManager(void)
 :   m_nextIndex( 1 ),
     m_niftiTransform( 4, 4 ),
-    m_forceLoadingAsMaximas( false )
+    m_forceLoadingAsMaximas( false ),
+	m_forceLoadingAsRestingState( false )
 {
 }
 
@@ -313,7 +314,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                  (0 == pHeader->dim[4] 
                   || ( 15 == pHeader->dim[4] && !m_forceLoadingAsMaximas )
                   || 28 == pHeader->dim[4] 
-                  || 45 == pHeader->dim[4] 
+				  || ( 45 == pHeader->dim[4] && !m_forceLoadingAsRestingState )
                   || 66 == pHeader->dim[4] 
                   || 91 == pHeader->dim[4] 
                   || 120 == pHeader->dim[4] 
@@ -342,7 +343,8 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                 result = loadMaximas( filename, pHeader, pBody );
             }
         }
-		else if( 4 == pHeader->ndim && 105 == pHeader->dim[4])
+		else if( 16 == pHeader->datatype && 4 == pHeader->ndim 
+			&& (108 == pHeader->dim[4] || ( 45 == pHeader->dim[4] && m_forceLoadingAsRestingState )))
         {
             if ( m_anatomies.empty() )
             {

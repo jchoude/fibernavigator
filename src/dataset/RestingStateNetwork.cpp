@@ -33,7 +33,7 @@ inline bool isnan(double x) {
 ///////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
 m_dataType( 16 ),
-m_bands( 105 )
+m_bands( 108 )
 {
 	m_rows = DatasetManager::getInstance()->getRows();
 	m_columns = DatasetManager::getInstance()->getColumns();
@@ -51,6 +51,9 @@ RestingStateNetwork::~RestingStateNetwork()
 bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 {
     int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
+	m_rows = pHeader->dim[1];
+	m_columns = pHeader->dim[2];
+	m_frames = pHeader->dim[3];
 	m_bands = pHeader->dim[4];
     
     m_fileFloatData.assign( datasetSize * m_bands, 0.0f);
@@ -75,7 +78,7 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 //////////////////////////////////////////////////////////////////////////
 bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatData )
 {
-    int size = DatasetManager::getInstance()->getColumns() * DatasetManager::getInstance()->getRows() * DatasetManager::getInstance()->getFrames();
+	int size = m_rows * m_columns * m_frames;
     m_signal.resize( size );
 
     vector< float >::iterator it;

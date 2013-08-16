@@ -64,6 +64,7 @@ public:
     bool                    isVectorsLoaded() const         { return false; }
     
     void                    forceLoadingAsMaximas(bool force) { m_forceLoadingAsMaximas = force; }
+	void                    forceLoadingAsRestingState(bool force) { m_forceLoadingAsRestingState = force; }
 
     void clear();
 
@@ -145,6 +146,7 @@ private:
     FMatrix m_niftiTransform;
     
     bool m_forceLoadingAsMaximas;
+	bool m_forceLoadingAsRestingState;
 };
 
 #endif //DATASETMANAGER_H_
