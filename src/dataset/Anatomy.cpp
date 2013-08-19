@@ -159,7 +159,7 @@ Anatomy::Anatomy( const int type )
 
         m_floatDataset.resize( m_columns * m_frames * m_rows * 3, 0.0f );
     }
-    else if(type == HEAD_BYTE || OVERLAY)
+    else if(type == HEAD_BYTE)
     {
         m_bands         = 1;
         m_isLoaded      = true;   
@@ -172,6 +172,45 @@ Anatomy::Anatomy( const int type )
         // Only compiled and runned in debug
         assert(false);
     }
+}
+
+Anatomy::Anatomy( const wxString &filename, const int type )
+: DatasetInfo(),
+  m_isSegmentOn( false ),
+  m_pRoi( NULL ),
+  m_dataType( 2 ),
+  m_pTensorField( NULL ),
+  m_useEqualizedDataset( false ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
+  m_currentLowerEqThreshold( -1 ),
+  m_currentUpperEqThreshold( -1 ),
+  m_originalAxialOrientation( ORIENTATION_UNDEFINED )
+{
+    m_columns = DatasetManager::getInstance()->getColumns();
+    m_rows    = DatasetManager::getInstance()->getRows();
+    m_frames  = DatasetManager::getInstance()->getFrames();
+	
+	m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+	m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+	m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
+
+    if(type == OVERLAY)
+    {
+        m_bands         = 1;
+        m_isLoaded      = true;   
+        m_type          = type;
+
+        m_floatDataset.resize( m_columns * m_frames * m_rows, 0.0f );
+    }
+
+	m_fullPath = filename;
+
+#ifdef __WXMSW__
+    m_name = filename.AfterLast( '\\' );
+#else
+    m_name = filename.AfterLast( '/' );
+#endif
 }
 
 void Anatomy::add( Anatomy* pAnatomy )

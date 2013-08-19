@@ -32,13 +32,19 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     SetSizer( m_pFMRISizer );
     SetAutoLayout( true );
 
-    m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load resting-state"), wxPoint(30,0), wxSize(115, -1) );
+    m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load resting-state"), wxPoint(30,0), wxSize(150, -1) );
 	pMf->Connect( m_pBtnSelectFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onLoadAsRestingState) );
     m_pBtnSelectFMRI->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
 	wxBoxSizer *pBoxRow1 = new wxBoxSizer( wxHORIZONTAL );
 	pBoxRow1->Add( m_pBtnSelectFMRI, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
 	m_pFMRISizer->Add( pBoxRow1, 0, wxFIXED_MINSIZE | wxALL, 2 );
+
+	m_pTextRest = new wxStaticText( this, wxID_ANY, wxT("Volume"), wxPoint(0,30), wxSize(60, -1), wxALIGN_CENTER );
+    m_pSliderRest = new MySlider( this, wxID_ANY, 1, 1, 108, wxPoint(60,30), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderRest->SetValue( 1 );
+    Connect( m_pSliderRest->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderRestMoved) );
+    m_pTxtRestBox = new wxTextCtrl( this, wxID_ANY, wxT("1"), wxPoint(190,30), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 }
 
@@ -59,12 +65,17 @@ wxSizer* FMRIWindow::getWindowSizer()
 
 void FMRIWindow::SetSelectButton()
 {
-	m_pBtnSelectFMRI->SetLabel( wxT("Done") );
+	DatasetIndex indx = DatasetManager::getInstance()->m_pRestingStateNetwork->getIndex();
+	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
+	m_pBtnSelectFMRI->SetLabel( pNewAnatomy->getName() );
     m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
-
+	
+	m_pSliderRest->SetMax(DatasetManager::getInstance()->m_pRestingStateNetwork->getBands());
 }
 
-void FMRIWindow::OnSelectFMRI( wxCommandEvent& WXUNUSED(event) )
+void FMRIWindow::OnSliderRestMoved( wxCommandEvent& WXUNUSED(event) )
 {
-
+	int sliderValue = m_pSliderRest->GetValue();
+    m_pTxtRestBox->SetValue( wxString::Format( wxT( "%i"), sliderValue ) );
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
 }

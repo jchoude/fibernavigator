@@ -595,9 +595,9 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
 DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
 {
     Logger::getInstance()->print( wxT( "Loading resting-state profile" ), LOGLEVEL_MESSAGE );
-	Anatomy *pAnatomy = new Anatomy( OVERLAY );
-	RestingStateNetwork *pRestingStateNetwork = new RestingStateNetwork();
-    if( pRestingStateNetwork->load( pHeader, pBody ) )
+	Anatomy *pAnatomy = new Anatomy( filename, OVERLAY ); //OVERLAY
+	m_pRestingStateNetwork = new RestingStateNetwork();
+    if( m_pRestingStateNetwork->load( pHeader, pBody ) )
     {
         Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
         pAnatomy->setThreshold( THRESHOLD );
@@ -605,12 +605,12 @@ DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_i
         pAnatomy->setShow( SHOW );
         pAnatomy->setShowFS( SHOW_FS );
         pAnatomy->setUseTex( USE_TEX );
-		wxString givenName = wxT("Network");
-		pAnatomy->setName( givenName );
-		pAnatomy->setFloatDataset( pRestingStateNetwork->data );
+		//wxString givenName = wxT("Network");
+		//pAnatomy->setName( givenName );
+		pAnatomy->setFloatDataset( m_pRestingStateNetwork->data );
 
         DatasetIndex index = insert( pAnatomy );
-		pRestingStateNetwork->setNetworkInfo( index );
+		m_pRestingStateNetwork->setNetworkInfo( index );
 
         SelectionTree::SelectionObjectVector objs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
         

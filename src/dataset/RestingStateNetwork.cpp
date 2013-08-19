@@ -6,8 +6,10 @@
 #include "RestingStateNetwork.h"
 
 #include "DatasetManager.h"
+#include "AnatomyHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
+#include "../gfx/TheScene.h"
 #include "../gui/MyListCtrl.h"
 #include "../gui/SceneManager.h"
 #include "../misc/nifti/nifti1_io.h"
@@ -59,15 +61,17 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
     m_fileFloatData.assign( datasetSize * m_bands, 0.0f);
     float* pData = (float*)pBody->data;
 
+	//Prepare the data into a 1D vector, side by side
     for( int i( 0 ); i < datasetSize; ++i )
     {
-        for( int j( 0 ); j < m_bands; ++j )
+        for( int j( 0 ); j < 2; ++j )
         {
             if(!isnan(pData[j * datasetSize + i]))
                 m_fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
         }
     }
     
+	//Assign structure to a 2D vector of timelaps
     createStructure( m_fileFloatData );
 
 	Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
@@ -89,12 +93,43 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
     { 
         m_signal[i].insert( m_signal[i].end(), it, it + m_bands );
     }
+	
+	//Normalize
+	float dataMax = 0.0f;
+    for( int s(0); s < size; ++s )
+    {
+        if (m_signal[s][0] > dataMax)
+        {
+            dataMax = m_signal[s][0];
+        }
+    }
 
-	for(int s = 0; s < size; s++)
+    for( int s(0); s < size; ++s )
+    {
+        m_signal[s][0] = m_signal[s][0] / dataMax;
+    }
+
+	//Create texture made of 1st timelaps
+	data.resize(size);
+	for(int x = 0; x < size; x++)
 	{
-		data.push_back(m_signal[s].at(0));
+		data[x] = m_signal[x][0];
 	}
 
     return true;
+}
+
+void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
+{
+	int size = m_rows * m_columns * m_frames;
+	int idx = sliderValue - 1;
+
+	for(int x = 0; x < size; x++)
+	{
+		data[x] = m_signal[x][idx];
+	}
+	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
+	pNewAnatomy->setFloatDataset(data);
+	pNewAnatomy->generateTexture();
 }
 

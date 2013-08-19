@@ -6,6 +6,7 @@
 #include "FibersGroup.h"
 #include "ODFs.h"
 #include "Maximas.h"
+#include "RestingStateNetwork.h"
 #include "../misc/Fantom/FMatrix.h"
 #include "../misc/nifti/nifti1_io.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
@@ -43,6 +44,7 @@ public:
     std::vector<Maximas *>  getMaximas() const;
     Fibers *                getSelectedFibers( DatasetIndex index ) const;
     std::vector<Tensors *>  getTensors() const;
+	RestingStateNetwork     *m_pRestingStateNetwork;
 
     int                     getColumns() const;
     int                     getFrames() const;

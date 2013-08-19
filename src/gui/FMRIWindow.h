@@ -34,11 +34,14 @@ public:
 	void SetSelectButton(); 
 
 public:
-	void OnSelectFMRI                     ( wxCommandEvent& event );
+	void OnSliderRestMoved                     ( wxCommandEvent& event );
 
 private:
     MainFrame           *m_pMainFrame;
 	wxButton            *m_pBtnSelectFMRI;
+	wxSlider            *m_pSliderRest;
+	wxTextCtrl          *m_pTxtRestBox;
+    wxStaticText        *m_pTextRest;
     
 private:
     wxSizer *m_pFMRISizer;

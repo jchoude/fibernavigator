@@ -13,21 +13,31 @@
 class RestingStateNetwork
 {
 public:
+
     // Constructor/Destructor
     RestingStateNetwork();
     virtual ~RestingStateNetwork();
+
 	bool load( nifti_image *pHeader, nifti_image *pBody );
 	void setNetworkInfo( DatasetIndex index ) { m_index = index; }
-	std::vector<std::vector<float> >* getSignal() { return &m_signal; }
+	void SetTextureFromSlider( int sliderValue );
 
-	std::vector<float> data;
+	std::vector<std::vector<float> >* getSignal() { return &m_signal; }
+	DatasetIndex getIndex()   { return m_index; }
+	DatasetIndex getColumns() { return m_columns; }
+	DatasetIndex getRows()    { return m_rows; }
+	DatasetIndex getFrames()  { return m_frames; }
+	DatasetIndex getBands()   { return m_bands; }
+	
+	std::vector<float> data; //Used for texture mapping
 
 private:
     
     bool createStructure  ( std::vector< float > &i_fileFloatData );
-  
+
     std::vector<std::vector<float> >   m_signal;
     std::vector< float > m_fileFloatData;
+
     int m_dataType;
 	int m_rows;
 	int m_columns;
