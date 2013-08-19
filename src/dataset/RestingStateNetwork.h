@@ -35,8 +35,9 @@ private:
     
     bool createStructure  ( std::vector< float > &i_fileFloatData );
 
-    std::vector<std::vector<float> >   m_signal;
-    std::vector< float > m_fileFloatData;
+    std::vector<std::vector<float> >   m_signal; //2D containing the data
+	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
+    std::vector< float > m_fileFloatData; //Long 1D
 
     int m_dataType;
 	int m_rows;

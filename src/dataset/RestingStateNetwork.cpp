@@ -64,9 +64,9 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	//Prepare the data into a 1D vector, side by side
     for( int i( 0 ); i < datasetSize; ++i )
     {
-        for( int j( 0 ); j < 2; ++j )
+        for( int j( 0 ); j < m_bands; ++j )
         {
-            if(!isnan(pData[j * datasetSize + i]))
+            //if(!isnan(pData[j * datasetSize + i]))
                 m_fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
         }
     }
@@ -84,36 +84,43 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
 {
 	int size = m_rows * m_columns * m_frames;
     m_signal.resize( size );
-
+	m_signalNormalized.resize ( size );
     vector< float >::iterator it;
     int i = 0;
 
     //Fetching the directions
     for( it = i_fileFloatData.begin(), i = 0; it != i_fileFloatData.end(); it += m_bands, ++i )
     { 
-        m_signal[i].insert( m_signal[i].end(), it, it + m_bands );
+		m_signal[i].insert( m_signal[i].end(), it, it + m_bands );
     }
 	
 	//Normalize
-	float dataMax = 0.0f;
+	vector<float> dataMax;
+	dataMax.assign(m_bands, 0.0f);
     for( int s(0); s < size; ++s )
     {
-        if (m_signal[s][0] > dataMax)
-        {
-            dataMax = m_signal[s][0];
-        }
+		for( int b(0); b < m_bands; ++b )
+		{
+			if (m_signal[s][b] > dataMax[b])
+			{
+				dataMax[b] = m_signal[s][b];
+			}
+		}
     }
 
     for( int s(0); s < size; ++s )
     {
-        m_signal[s][0] = m_signal[s][0] / dataMax;
+		for( int b(0); b < m_bands; ++b )
+		{
+			m_signalNormalized[s].push_back (m_signal[s][b] / dataMax[b]);
+		}
     }
 
 	//Create texture made of 1st timelaps
 	data.resize(size);
 	for(int x = 0; x < size; x++)
 	{
-		data[x] = m_signal[x][0];
+		data[x] = m_signalNormalized[x][0];
 	}
 
     return true;
@@ -126,7 +133,7 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 
 	for(int x = 0; x < size; x++)
 	{
-		data[x] = m_signal[x][idx];
+		data[x] = m_signalNormalized[x][idx];
 	}
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
 	pNewAnatomy->setFloatDataset(data);
