@@ -62,7 +62,7 @@ public:
 
     float at( const int i ) const;
     std::vector<float>* getFloatDataset();
-	void setFloatDataset(std::vector<float> dataset) { m_floatDataset = dataset; }
+	void setFloatDataset(std::vector<float>& dataset) { m_floatDataset = dataset; }
     std::vector<float>* getEqualizedDataset();
 
     MySlider            *m_pSliderFlood;
