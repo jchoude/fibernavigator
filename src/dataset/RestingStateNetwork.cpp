@@ -94,25 +94,31 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
 		m_signal[i].insert( m_signal[i].end(), it, it + m_bands );
     }
 	
-	//Normalize
-	vector<float> dataMax;
-	dataMax.assign(m_bands, 0.0f);
+	//Find min/max for normalization
+	vector<float> dataMax, dataMin;
+	dataMax.assign(size, -std::numeric_limits<float>::infinity());
+	dataMin.assign(size, std::numeric_limits<float>::infinity());
     for( int s(0); s < size; ++s )
     {
 		for( int b(0); b < m_bands; ++b )
 		{
-			if (m_signal[s][b] > dataMax[b])
+			if (m_signal[s][b] > dataMax[s])
 			{
-				dataMax[b] = m_signal[s][b];
+				dataMax[s] = m_signal[s][b];
+			}
+			if (m_signal[s][b] < dataMin[s])
+			{
+				dataMin[s] = m_signal[s][b];
 			}
 		}
     }
 
+	//Min max Rescale
     for( int s(0); s < size; ++s )
     {
 		for( int b(0); b < m_bands; ++b )
 		{
-			m_signalNormalized[s].push_back (m_signal[s][b] / dataMax[b]);
+			m_signalNormalized[s].push_back ((m_signal[s][b] - dataMin[s]) / (dataMax[s] - dataMin[s]));
 		}
     }
 
