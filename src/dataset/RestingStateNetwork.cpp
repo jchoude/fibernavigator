@@ -58,7 +58,7 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	m_frames = pHeader->dim[3];
 	m_bands = pHeader->dim[4];
     
-    m_fileFloatData.assign( datasetSize * m_bands, 0.0f);
+	std::vector<float> fileFloatData( datasetSize * m_bands, 0.0f);
     float* pData = (float*)pBody->data;
 
 	//Prepare the data into a 1D vector, side by side
@@ -67,12 +67,12 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
         for( int j( 0 ); j < m_bands; ++j )
         {
             //if(!isnan(pData[j * datasetSize + i]))
-                m_fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
+                fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
         }
     }
     
 	//Assign structure to a 2D vector of timelaps
-    createStructure( m_fileFloatData );
+    createStructure( fileFloatData );
 
 	Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
     return true;
@@ -121,12 +121,22 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
 			m_signalNormalized[s].push_back ((m_signal[s][b] - dataMin[s]) / (dataMax[s] - dataMin[s]));
 		}
     }
+	
+	m_volumes.resize(m_bands);
+	//Transpose signal for easy acces of timelaps
+    for( int s(0); s < size; ++s )
+    {
+		for( int b(0); b < m_bands; ++b )
+		{
+			m_volumes[b].push_back(m_signalNormalized[s][b]);
+		}
+    }
 
 	//Create texture made of 1st timelaps
 	data.resize(size);
 	for(int x = 0; x < size; x++)
 	{
-		data[x] = m_signalNormalized[x][0];
+		data[x] = m_volumes[0][x];
 	}
 
     return true;
@@ -137,12 +147,8 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 	int size = m_rows * m_columns * m_frames;
 	int idx = sliderValue - 1;
 
-	for(int x = 0; x < size; x++)
-	{
-		data[x] = m_signalNormalized[x][idx];
-	}
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-	pNewAnatomy->setFloatDataset(data);
+	pNewAnatomy->setFloatDataset(m_volumes[idx]);
 	pNewAnatomy->generateTexture();
 }
 
