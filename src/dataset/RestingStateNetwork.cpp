@@ -59,17 +59,33 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	m_bands = pHeader->dim[4];
     
 	std::vector<float> fileFloatData( datasetSize * m_bands, 0.0f);
-    float* pData = (float*)pBody->data;
 
-	//Prepare the data into a 1D vector, side by side
-    for( int i( 0 ); i < datasetSize; ++i )
-    {
-        for( int j( 0 ); j < m_bands; ++j )
-        {
-            //if(!isnan(pData[j * datasetSize + i]))
-                fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
-        }
-    }
+	if(pHeader->datatype == 4)
+	{
+		short int* pData = (short int*)pBody->data;
+		//Prepare the data into a 1D vector, side by side
+		for( int i( 0 ); i < datasetSize; ++i )
+		{
+			for( int j( 0 ); j < m_bands; ++j )
+			{
+				//if(!isnan(pData[j * datasetSize + i]))
+					fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
+			}
+		}
+	}
+	else
+	{
+		float* pData = (float*)pBody->data;
+		//Prepare the data into a 1D vector, side by side
+		for( int i( 0 ); i < datasetSize; ++i )
+		{
+			for( int j( 0 ); j < m_bands; ++j )
+			{
+				//if(!isnan(pData[j * datasetSize + i]))
+					fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
+			}
+		}
+	}
     
 	//Assign structure to a 2D vector of timelaps
     createStructure( fileFloatData );

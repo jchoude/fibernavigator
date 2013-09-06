@@ -343,8 +343,7 @@ DatasetIndex DatasetManager::load( const wxString &filename, const wxString &ext
                 result = loadMaximas( filename, pHeader, pBody );
             }
         }
-		else if( 16 == pHeader->datatype && 4 == pHeader->ndim 
-			&& (108 == pHeader->dim[4] || ( 45 == pHeader->dim[4] && m_forceLoadingAsRestingState )))
+		else if( m_forceLoadingAsRestingState )
         {
             if ( m_anatomies.empty() )
             {
