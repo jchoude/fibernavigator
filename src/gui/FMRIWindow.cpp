@@ -41,10 +41,10 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	m_pFMRISizer->Add( pBoxRow1, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
 	m_pTextRest = new wxStaticText( this, wxID_ANY, wxT("Volume"), wxPoint(0,30), wxSize(60, -1), wxALIGN_CENTER );
-    m_pSliderRest = new MySlider( this, wxID_ANY, 1, 1, 108, wxPoint(60,30), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderRest->SetValue( 1 );
+    m_pSliderRest = new MySlider( this, wxID_ANY, 0, 0, 107, wxPoint(60,30), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    //m_pSliderRest->SetValue( 0 );
     Connect( m_pSliderRest->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderRestMoved) );
-    m_pTxtRestBox = new wxTextCtrl( this, wxID_ANY, wxT("1"), wxPoint(190,30), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+    m_pTxtRestBox = new wxTextCtrl( this, wxID_ANY, wxT("0"), wxPoint(190,30), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
 }
 
@@ -70,7 +70,8 @@ void FMRIWindow::SetSelectButton()
 	m_pBtnSelectFMRI->SetLabel( pNewAnatomy->getName() );
     m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
 	
-	m_pSliderRest->SetMax(DatasetManager::getInstance()->m_pRestingStateNetwork->getBands());
+	//Set slider max value according to number of timelaps
+	m_pSliderRest->SetMax((int)DatasetManager::getInstance()->m_pRestingStateNetwork->getBands()-1);
 }
 
 void FMRIWindow::OnSliderRestMoved( wxCommandEvent& WXUNUSED(event) )

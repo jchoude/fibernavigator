@@ -160,11 +160,8 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
 
 void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 {
-	int size = m_rows * m_columns * m_frames;
-	int idx = sliderValue - 1;
-
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-	pNewAnatomy->setFloatDataset(m_volumes[idx]);
+	pNewAnatomy->setFloatDataset(m_volumes[sliderValue]);
 	pNewAnatomy->generateTexture();
 }
 
