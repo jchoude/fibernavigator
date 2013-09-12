@@ -34,14 +34,23 @@ public:
 	void SetSelectButton(); 
 
 public:
+	void onSwitchViewRaw					   ( wxCommandEvent& event );
+	void onSwitchViewNet					   ( wxCommandEvent& event );
 	void OnSliderRestMoved                     ( wxCommandEvent& event );
+
 
 private:
     MainFrame           *m_pMainFrame;
 	wxButton            *m_pBtnSelectFMRI;
+	wxRadioButton		*m_pRadShowRawData;
+	wxRadioButton		*m_pRadShowNetwork;
 	wxSlider            *m_pSliderRest;
 	wxTextCtrl          *m_pTxtRestBox;
-    wxStaticText        *m_pTextRest;
+    wxStaticText        *m_pTextVolumeId;
+	wxStaticText        *m_pTextDisplayMode;
+	wxBoxSizer          *m_pBoxDisplayRadios;
+
+	bool showRawData;
     
 private:
     wxSizer *m_pFMRISizer;

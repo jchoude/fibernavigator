@@ -25,14 +25,15 @@ END_EVENT_TABLE()
 
 FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const wxPoint &pos, const wxSize &size)
 :   wxScrolledWindow( pParent, id, pos, size, wxBORDER_NONE, _T("fMRI resting-state networks") ),
-    m_pMainFrame( pMf )
+    m_pMainFrame( pMf ),
+	showRawData( true )
 {
     SetBackgroundColour( *wxLIGHT_GREY );
     m_pFMRISizer = new wxBoxSizer( wxVERTICAL );
     SetSizer( m_pFMRISizer );
     SetAutoLayout( true );
 
-    m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load resting-state"), wxPoint(30,0), wxSize(150, -1) );
+    m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load resting-state"), wxPoint(30,0), wxSize(200, -1) );
 	pMf->Connect( m_pBtnSelectFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onLoadAsRestingState) );
     m_pBtnSelectFMRI->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
@@ -40,12 +41,31 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow1->Add( m_pBtnSelectFMRI, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
 	m_pFMRISizer->Add( pBoxRow1, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
-	m_pTextRest = new wxStaticText( this, wxID_ANY, wxT("Volume"), wxPoint(0,30), wxSize(60, -1), wxALIGN_CENTER );
-    m_pSliderRest = new MySlider( this, wxID_ANY, 0, 0, 107, wxPoint(60,30), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    //m_pSliderRest->SetValue( 0 );
-    Connect( m_pSliderRest->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderRestMoved) );
-    m_pTxtRestBox = new wxTextCtrl( this, wxID_ANY, wxT("0"), wxPoint(190,30), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+	m_pTextDisplayMode = new wxStaticText( this, wxID_ANY, wxT( "Display:" ), wxPoint(0,30), wxSize(200, -1) );
+    m_pRadShowRawData = new wxRadioButton( this,  wxID_ANY, wxT( "Raw Data" ), wxPoint(30,60), wxSize(160, -1) );
+	m_pRadShowRawData->Disable();
+	m_pRadShowNetwork = new wxRadioButton( this,  wxID_ANY, wxT( "Network" ), wxPoint(30,90), wxSize(160, -1) );
+	m_pRadShowNetwork->Disable();
+	Connect( m_pRadShowRawData->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( FMRIWindow::onSwitchViewRaw ) );
+	Connect( m_pRadShowNetwork->GetId(), wxEVT_COMMAND_RADIOBUTTON_SELECTED, wxCommandEventHandler( FMRIWindow::onSwitchViewNet ) );
 
+	wxBoxSizer *pBoxRow2 = new wxBoxSizer( wxVERTICAL );
+	pBoxRow2->Add( m_pTextDisplayMode, 0, wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+	pBoxRow2->Add( m_pRadShowRawData, 0, wxALIGN_CENTER, 1 );
+	pBoxRow2->Add( m_pRadShowNetwork, 0, wxALIGN_CENTER, 1 );
+	m_pFMRISizer->Add( pBoxRow2, 0, wxFIXED_MINSIZE | wxALL, 2 );
+
+	m_pTextVolumeId = new wxStaticText( this, wxID_ANY, wxT("Volume"), wxPoint(0,120), wxSize(60, -1), wxALIGN_CENTER );
+	m_pSliderRest = new MySlider( this, wxID_ANY, 0, 0, 107, wxPoint(60,120), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderRest->Disable();
+	Connect( m_pSliderRest->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderRestMoved) );
+    m_pTxtRestBox = new wxTextCtrl( this, wxID_ANY, wxT("0"), wxPoint(190,120), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+	wxBoxSizer *pBoxRow3 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow3->Add( m_pTextVolumeId, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxRow3->Add( m_pSliderRest,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
+	pBoxRow3->Add( m_pTxtRestBox,   0, wxALIGN_LEFT | wxALL, 1);
+	m_pFMRISizer->Add( pBoxRow3, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 }
 
 void FMRIWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -70,10 +90,30 @@ void FMRIWindow::SetSelectButton()
 	m_pBtnSelectFMRI->SetLabel( pNewAnatomy->getName() );
     m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
 	
+	m_pSliderRest->Enable();
 	//Set slider max value according to number of timelaps
 	m_pSliderRest->SetMax((int)DatasetManager::getInstance()->m_pRestingStateNetwork->getBands()-1);
+
+	m_pRadShowRawData->Enable();
+	m_pRadShowNetwork->Enable();
+	m_pRadShowRawData->SetValue(true);	
 }
 
+void FMRIWindow::onSwitchViewRaw( wxCommandEvent& WXUNUSED(event) )
+{
+	showRawData = true;
+	m_pSliderRest->Enable();
+	m_pTextVolumeId->Enable();
+	m_pTxtRestBox->Enable();
+}
+
+void FMRIWindow::onSwitchViewNet( wxCommandEvent& WXUNUSED(event) )
+{
+	showRawData = false;
+	m_pSliderRest->Disable();
+	m_pTextVolumeId->Disable();
+	m_pTxtRestBox->Disable();
+}
 void FMRIWindow::OnSliderRestMoved( wxCommandEvent& WXUNUSED(event) )
 {
 	int sliderValue = m_pSliderRest->GetValue();
