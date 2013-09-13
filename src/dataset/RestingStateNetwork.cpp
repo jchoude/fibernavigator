@@ -34,6 +34,7 @@ inline bool isnan(double x) {
 
 ///////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
+m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 )
 {
@@ -150,10 +151,11 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
 
 	//Create texture made of 1st timelaps
 	data.resize(size);
-	for(int x = 0; x < size; x++)
-	{
-		data[x] = m_volumes[0][x];
-	}
+	//for(int x = 0; x < size; x++)
+	//{
+	//	data[x] = m_volumes[0][x];
+	//}
+	data = m_volumes[0];
 
     return true;
 }
@@ -162,6 +164,21 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 {
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
 	pNewAnatomy->setFloatDataset(m_volumes[sliderValue]);
+	pNewAnatomy->generateTexture();
+}
+
+void RestingStateNetwork::SetTextureFromNetwork()
+{
+	if(m_isRealTimeOn)
+	{
+		data = m_volumes[0];
+	}
+	else
+	{
+		std::fill(data.begin(), data.end(), 0);
+	}
+	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
+	pNewAnatomy->setFloatDataset(data);
 	pNewAnatomy->generateTexture();
 }
 

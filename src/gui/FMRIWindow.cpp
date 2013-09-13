@@ -105,6 +105,10 @@ void FMRIWindow::onSwitchViewRaw( wxCommandEvent& WXUNUSED(event) )
 	m_pSliderRest->Enable();
 	m_pTextVolumeId->Enable();
 	m_pTxtRestBox->Enable();
+	
+	int sliderValue = m_pSliderRest->GetValue();
+    m_pTxtRestBox->SetValue( wxString::Format( wxT( "%i"), sliderValue ) );
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
 }
 
 void FMRIWindow::onSwitchViewNet( wxCommandEvent& WXUNUSED(event) )
@@ -113,6 +117,7 @@ void FMRIWindow::onSwitchViewNet( wxCommandEvent& WXUNUSED(event) )
 	m_pSliderRest->Disable();
 	m_pTextVolumeId->Disable();
 	m_pTxtRestBox->Disable();
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetTextureFromNetwork();
 }
 void FMRIWindow::OnSliderRestMoved( wxCommandEvent& WXUNUSED(event) )
 {

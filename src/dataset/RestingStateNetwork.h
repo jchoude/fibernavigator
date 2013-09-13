@@ -21,6 +21,7 @@ public:
 	bool load( nifti_image *pHeader, nifti_image *pBody );
 	void setNetworkInfo( DatasetIndex index ) { m_index = index; }
 	void SetTextureFromSlider( int sliderValue );
+	void SetTextureFromNetwork();
 
 	std::vector<std::vector<float> >* getSignal() { return &m_signal; }
 	DatasetIndex getIndex()   { return m_index; }
@@ -39,6 +40,7 @@ private:
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
 
+	bool m_isRealTimeOn;
     int m_dataType;
 	int m_rows;
 	int m_columns;
