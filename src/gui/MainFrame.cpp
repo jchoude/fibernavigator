@@ -23,6 +23,7 @@
 #include "../dataset/ODFs.h"
 #include "../dataset/Tensors.h"
 #include "../dataset/RTTrackingHelper.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../dataset/Maximas.h"
 #include "../gfx/TheScene.h"
 #include "../gui/SceneManager.h"
@@ -444,6 +445,7 @@ void MainFrame::onLoadAsPeaks( wxCommandEvent& WXUNUSED(event) )
     }
     
 	m_pFMRIWindow->SetSelectButton();
+	m_pFMRIWindow->SetStartButton();
     refreshAllGLWidgets();
 }
 

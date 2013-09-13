@@ -22,6 +22,8 @@ public:
 	void setNetworkInfo( DatasetIndex index ) { m_index = index; }
 	void SetTextureFromSlider( int sliderValue );
 	void SetTextureFromNetwork();
+	
+	void seedBased();
 
 	std::vector<std::vector<float> >* getSignal() { return &m_signal; }
 	DatasetIndex getIndex()   { return m_index; }

@@ -15,6 +15,7 @@
 #include "../dataset/FibersGroup.h"
 #include "../dataset/ODFs.h"
 #include "../dataset/RTTrackingHelper.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../dataset/Tensors.h"
 #include "../dataset/Maximas.h"
 #include "../gui/SelectionVOI.h"

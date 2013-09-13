@@ -10,6 +10,7 @@
 #include "../dataset/AnatomyHelper.h"
 #include "../dataset/DatasetManager.h"
 #include "../dataset/RTTrackingHelper.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../dataset/Tensors.h"
 #include "../gfx/ShaderHelper.h"
 #include "../misc/lic/FgeOffscreen.h"
@@ -422,6 +423,7 @@ void MainCanvas::processRightMouseDown( wxMouseEvent &evt, int clickX, int click
             ( (SelectionObject*) m_hr.object )->processDrag( evt.GetPosition(), m_lastPos, m_projection, m_viewport, m_modelview);
             SceneManager::getInstance()->setSelBoxChanged( true );
             RTTrackingHelper::getInstance()->setRTTDirty( true );
+			RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
         }
     }
     m_lastPos = evt.GetPosition();
@@ -784,7 +786,7 @@ void MainCanvas::render()
                     //TODO, may be useful later
                     //renderDrawerDisplay();
                 }
-
+				//Real-time Fiber Tractography
                 if( RTTrackingHelper::getInstance()->isRTTDirty() && RTTrackingHelper::getInstance()->isRTTReady() )
                 {	
 					m_pRealTimeFibers->seed();
@@ -795,6 +797,11 @@ void MainCanvas::render()
                         m_pRealTimeFibers->renderRTTFibers(false);
                     else
                         m_pRealTimeFibers->renderRTTFibers(true);
+                }
+				//Real-time fMRI correlation
+				if( RTFMRIHelper::getInstance()->isRTFMRIDirty() && RTFMRIHelper::getInstance()->isRTFMRIReady() )
+                {	
+					DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
                 }
 
                 //save context for picking

@@ -32,13 +32,16 @@ public:
     void OnSize( wxSizeEvent &event );
     wxSizer* getWindowSizer();
 	void SetSelectButton(); 
+	void SetStartButton(){ m_pBtnStart->Enable( true ); m_pBtnStart->SetBackgroundColour(wxColour( 147, 255, 239 ));}
 
 public:
 	void onSwitchViewRaw					   ( wxCommandEvent& event );
 	void onSwitchViewNet					   ( wxCommandEvent& event );
 	void OnSliderRestMoved                     ( wxCommandEvent& event );
-
-
+	void OnStartRTFMRI					       ( wxCommandEvent& event );
+	
+	
+	
 private:
     MainFrame           *m_pMainFrame;
 	wxButton            *m_pBtnSelectFMRI;
@@ -49,6 +52,7 @@ private:
     wxStaticText        *m_pTextVolumeId;
 	wxStaticText        *m_pTextDisplayMode;
 	wxBoxSizer          *m_pBoxDisplayRadios;
+	wxToggleButton      *m_pBtnStart;
 
 	bool showRawData;
     

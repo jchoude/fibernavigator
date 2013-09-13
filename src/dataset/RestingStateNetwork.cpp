@@ -7,6 +7,7 @@
 
 #include "DatasetManager.h"
 #include "AnatomyHelper.h"
+#include "RTFMRIHelper.h"
 #include "../Logger.h"
 #include "../gfx/ShaderHelper.h"
 #include "../gfx/TheScene.h"
@@ -150,12 +151,7 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
     }
 
 	//Create texture made of 1st timelaps
-	data.resize(size);
-	//for(int x = 0; x < size; x++)
-	//{
-	//	data[x] = m_volumes[0][x];
-	//}
-	data = m_volumes[0];
+	data.assign(size, 0.0f);
 
     return true;
 }
@@ -169,16 +165,50 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 
 void RestingStateNetwork::SetTextureFromNetwork()
 {
-	if(m_isRealTimeOn)
-	{
-		data = m_volumes[0];
-	}
-	else
-	{
-		std::fill(data.begin(), data.end(), 0);
-	}
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
 	pNewAnatomy->setFloatDataset(data);
 	pNewAnatomy->generateTexture();
 }
 
+void RestingStateNetwork::seedBased()
+{
+	//m_fibersRTT.clear();
+    //m_colorsRTT.clear();
+	 
+    float xVoxel = DatasetManager::getInstance()->getVoxelX();
+    float yVoxel = DatasetManager::getInstance()->getVoxelY();
+    float zVoxel = DatasetManager::getInstance()->getVoxelZ();
+
+	int columns = DatasetManager::getInstance()->getColumns();
+    int rows    = DatasetManager::getInstance()->getRows();
+
+    Vector minCorner, maxCorner, middle;
+    SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
+
+	for( unsigned int b = 0; b < selObjs.size(); b++ )
+	{
+		minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel /  2.0f ) / xVoxel );
+		minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel /  2.0f ) / yVoxel );
+		minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel /  2.0f ) / zVoxel );
+		maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel /  2.0f ) / xVoxel );
+		maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel /  2.0f ) / yVoxel );
+		maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel /  2.0f ) / zVoxel );
+		
+		for( float x = minCorner.x; x <= maxCorner.x; x++)
+		{
+			for( float y = minCorner.y; y <= maxCorner.y; y++)
+			{
+				for( float z = minCorner.z; z <= maxCorner.z; z++)
+				{
+					float pos = z * columns * rows + y *columns + x;
+					data[pos] = 256;
+				}
+			}
+		}
+	}
+	
+	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
+	pNewAnatomy->setFloatDataset(data);
+	pNewAnatomy->generateTexture();
+	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
+}

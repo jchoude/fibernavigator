@@ -8,6 +8,7 @@
 #include "../dataset/Anatomy.h"
 #include "../dataset/Fibers.h"
 #include "../dataset/RestingStateNetwork.h"
+#include "../dataset/RTFMRIHelper.h"
 #include "../misc/IsoSurface/CIsoSurface.h"
 #include "../misc/IsoSurface/TriangleMesh.h"
 
@@ -33,7 +34,7 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     SetSizer( m_pFMRISizer );
     SetAutoLayout( true );
 
-    m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load resting-state"), wxPoint(30,0), wxSize(200, -1) );
+    m_pBtnSelectFMRI = new wxButton( this, wxID_ANY,wxT("Load resting-state"), wxPoint(30,0), wxSize(230, -1) );
 	pMf->Connect( m_pBtnSelectFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onLoadAsRestingState) );
     m_pBtnSelectFMRI->SetBackgroundColour(wxColour( 255, 147, 147 ));
 
@@ -66,6 +67,14 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     pBoxRow3->Add( m_pSliderRest,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
 	pBoxRow3->Add( m_pTxtRestBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow3, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+	m_pBtnStart = new wxToggleButton( this, wxID_ANY,wxT("Start correlation"), wxPoint(0,150), wxSize(230, 50) );
+    Connect( m_pBtnStart->GetId(), wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::OnStartRTFMRI) );
+    m_pBtnStart->Enable(false);
+
+	wxBoxSizer *pBoxRow4 = new wxBoxSizer( wxHORIZONTAL );
+	pBoxRow4->Add( m_pBtnStart, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
+	m_pFMRISizer->Add( pBoxRow4, 0, wxFIXED_MINSIZE | wxALL, 2 );
 }
 
 void FMRIWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -90,13 +99,13 @@ void FMRIWindow::SetSelectButton()
 	m_pBtnSelectFMRI->SetLabel( pNewAnatomy->getName() );
     m_pBtnSelectFMRI->SetBackgroundColour(wxNullColour);
 	
-	m_pSliderRest->Enable();
+	//m_pSliderRest->Enable();
 	//Set slider max value according to number of timelaps
 	m_pSliderRest->SetMax((int)DatasetManager::getInstance()->m_pRestingStateNetwork->getBands()-1);
 
 	m_pRadShowRawData->Enable();
 	m_pRadShowNetwork->Enable();
-	m_pRadShowRawData->SetValue(true);	
+	m_pRadShowNetwork->SetValue(true);	
 }
 
 void FMRIWindow::onSwitchViewRaw( wxCommandEvent& WXUNUSED(event) )
@@ -125,3 +134,22 @@ void FMRIWindow::OnSliderRestMoved( wxCommandEvent& WXUNUSED(event) )
     m_pTxtRestBox->SetValue( wxString::Format( wxT( "%i"), sliderValue ) );
 	DatasetManager::getInstance()->m_pRestingStateNetwork->SetTextureFromSlider( sliderValue );
 }
+
+void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
+{
+	RTFMRIHelper::getInstance()->toggleRTFMRIReady();
+    RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
+
+    if( !RTFMRIHelper::getInstance()->isRTFMRIReady() )
+    {
+        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
+        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
+        RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+        m_pBtnStart->SetLabel(wxT("Start correlation"));
+    }
+    else
+    {
+        m_pBtnStart->SetLabel(wxT("Stop correlation"));
+	}
+}
+
