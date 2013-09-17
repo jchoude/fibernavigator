@@ -23,7 +23,6 @@
 #include <fstream>
 #include <limits>
 #include <vector>
-using std::vector;
 
 #if defined(__WXMAC__) || defined(__WXMSW__)
 #ifndef isnan
@@ -54,24 +53,24 @@ RestingStateNetwork::~RestingStateNetwork()
 //////////////////////////////////////////////////////////////////////////
 bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 {
-    int datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
+    m_datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
 	m_rows = pHeader->dim[1];
 	m_columns = pHeader->dim[2];
 	m_frames = pHeader->dim[3];
 	m_bands = pHeader->dim[4];
     
-	std::vector<float> fileFloatData( datasetSize * m_bands, 0.0f);
+	std::vector<float> fileFloatData( m_datasetSize * m_bands, 0.0f);
 
 	if(pHeader->datatype == 4)
 	{
 		short int* pData = (short int*)pBody->data;
 		//Prepare the data into a 1D vector, side by side
-		for( int i( 0 ); i < datasetSize; ++i )
+		for( int i( 0 ); i < m_datasetSize; ++i )
 		{
 			for( int j( 0 ); j < m_bands; ++j )
 			{
 				//if(!isnan(pData[j * datasetSize + i]))
-					fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
+					fileFloatData[i * m_bands + j] = pData[j * m_datasetSize + i];
 			}
 		}
 	}
@@ -79,12 +78,12 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	{
 		float* pData = (float*)pBody->data;
 		//Prepare the data into a 1D vector, side by side
-		for( int i( 0 ); i < datasetSize; ++i )
+		for( int i( 0 ); i < m_datasetSize; ++i )
 		{
 			for( int j( 0 ); j < m_bands; ++j )
 			{
 				//if(!isnan(pData[j * datasetSize + i]))
-					fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
+					fileFloatData[i * m_bands + j] = pData[j * m_datasetSize + i];
 			}
 		}
 	}
@@ -172,8 +171,7 @@ void RestingStateNetwork::SetTextureFromNetwork()
 
 void RestingStateNetwork::seedBased()
 {
-	//m_fibersRTT.clear();
-    //m_colorsRTT.clear();
+	std::vector<float> texture(m_datasetSize, 0.0f);
 	 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
     float yVoxel = DatasetManager::getInstance()->getVoxelY();
@@ -181,6 +179,7 @@ void RestingStateNetwork::seedBased()
 
 	int columns = DatasetManager::getInstance()->getColumns();
     int rows    = DatasetManager::getInstance()->getRows();
+	std::vector<float> positions; 
 
     Vector minCorner, maxCorner, middle;
     SelectionTree::SelectionObjectVector selObjs = SceneManager::getInstance()->getSelectionTree().getAllObjects();
@@ -200,15 +199,39 @@ void RestingStateNetwork::seedBased()
 			{
 				for( float z = minCorner.z; z <= maxCorner.z; z++)
 				{
-					float pos = z * columns * rows + y *columns + x;
-					data[pos] = 256;
+					positions.push_back( z * columns * rows + y *columns + x );
 				}
 			}
 		}
+		correlate(texture, positions);
 	}
 	
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-	pNewAnatomy->setFloatDataset(data);
+	pNewAnatomy->setFloatDataset(texture);
 	pNewAnatomy->generateTexture();
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
+}
+
+void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<float>& positions)
+{
+	//Mean signal inside box
+	std::vector<float> meanSignal;
+	for(int i=0; i < m_bands; i++)
+	{
+		float sum = 0;
+		for(int j=0; j < positions.size(); j++)
+		{	
+			int idx = positions[j];
+			sum += m_signalNormalized[idx][i];
+		}
+		sum /= positions.size();
+		meanSignal.push_back( sum );
+	}
+	
+	//Update texture
+	for(int t=0; t < positions.size(); t++)
+	{
+		int idx = positions[t];
+		texture[idx] = meanSignal[0];
+	}
 }

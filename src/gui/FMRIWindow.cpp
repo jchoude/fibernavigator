@@ -114,6 +114,8 @@ void FMRIWindow::onSwitchViewRaw( wxCommandEvent& WXUNUSED(event) )
 	m_pSliderRest->Enable();
 	m_pTextVolumeId->Enable();
 	m_pTxtRestBox->Enable();
+
+
 	
 	int sliderValue = m_pSliderRest->GetValue();
     m_pTxtRestBox->SetValue( wxString::Format( wxT( "%i"), sliderValue ) );

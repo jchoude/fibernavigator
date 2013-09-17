@@ -37,6 +37,7 @@ public:
 private:
     
     bool createStructure  ( std::vector< float > &i_fileFloatData );
+	void correlate(std::vector<float>& texture, std::vector< float >& position);
 
     std::vector<std::vector<float> >   m_signal; //2D containing the data
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
@@ -48,6 +49,7 @@ private:
 	int m_columns;
 	int m_frames;
 	int m_bands;
+	int m_datasetSize;
 	DatasetIndex m_index;
 
 };
