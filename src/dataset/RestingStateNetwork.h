@@ -38,10 +38,12 @@ private:
     
     bool createStructure  ( std::vector< float > &i_fileFloatData );
 	void correlate(std::vector<float>& texture, std::vector< float >& position);
+	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
 
     std::vector<std::vector<float> >   m_signal; //2D containing the data
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
+	std::vector<std::pair< float, float > > m_meansAndSigmas;
 
 	bool m_isRealTimeOn;
     int m_dataType;

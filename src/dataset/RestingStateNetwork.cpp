@@ -140,6 +140,7 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
     }
 	
 	m_volumes.resize(m_bands);
+	m_meansAndSigmas.resize(size);
 	//Transpose signal for easy acces of timelaps
     for( int s(0); s < size; ++s )
     {
@@ -147,6 +148,7 @@ bool RestingStateNetwork::createStructure  ( std::vector< float > &i_fileFloatDa
 		{
 			m_volumes[b].push_back(m_signalNormalized[s][b]);
 		}
+		calculateMeanAndSigma(m_signalNormalized[s], m_meansAndSigmas[s]);
     }
 
 	//Create texture made of 1st timelaps
@@ -219,7 +221,7 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 	for(int i=0; i < m_bands; i++)
 	{
 		float sum = 0;
-		for(int j=0; j < positions.size(); j++)
+		for(unsigned int j=0; j < positions.size(); j++)
 		{	
 			int idx = positions[j];
 			sum += m_signalNormalized[idx][i];
@@ -227,11 +229,46 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 		sum /= positions.size();
 		meanSignal.push_back( sum );
 	}
-	
-	//Update texture
-	for(int t=0; t < positions.size(); t++)
+
+	//Get mean and sigma of it
+	std::pair<float, float> RefMeanAndSigma;
+	calculateMeanAndSigma(meanSignal, RefMeanAndSigma);
+
+	for(int i = 0; i < m_datasetSize; i++)
 	{
-		int idx = positions[t];
-		texture[idx] = meanSignal[0];
+		float num = 0.0f;
+		float denum = 0.0f;
+		for(int j = 0; j < m_bands; j++)
+		{
+			num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
+		}
+		float value = num / ((m_bands - 1) * RefMeanAndSigma.second * m_meansAndSigmas[i].second);
+		
+		if(value > 0.8)
+			texture[i] = value*256;
 	}
+}
+
+void RestingStateNetwork::calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params)
+{
+	float mean = 0.0f;
+	float sigma = 0.0f;
+	
+	//mean
+	for(unsigned int i=0; i < signal.size(); i++)
+	{
+		mean+=signal[i];
+	}
+	mean /= signal.size();
+
+	//sigma
+    for(unsigned int i = 0; i < signal.size(); i++)
+    {
+         sigma += (signal[i] - mean) * (signal[i] - mean) ;
+    }
+    sigma /= signal.size();
+
+	params.first = mean;
+	params.second = sigma;
+
 }
