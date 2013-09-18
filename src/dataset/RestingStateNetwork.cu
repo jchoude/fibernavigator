@@ -23,14 +23,14 @@
 #include <fstream>
 #include <limits>
 #include <vector>
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
-#if defined(__WXMAC__) || defined(__WXMSW__)
-#ifndef isnan
-inline bool isnan(double x) {
-    return x != x;
+ __global__ void cuCorrelation()
+{
+
 }
-#endif
-#endif
 
 ///////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
