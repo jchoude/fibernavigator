@@ -25,7 +25,7 @@ public:
 	
 	void seedBased();
 
-	std::vector<std::vector<float> >* getSignal() { return &m_signal; }
+	std::vector<std::vector<short int> >* getSignal() { return &m_signal; }
 	DatasetIndex getIndex()   { return m_index; }
 	DatasetIndex getColumns() { return m_columns; }
 	DatasetIndex getRows()    { return m_rows; }
@@ -36,14 +36,16 @@ public:
 
 private:
     
-    bool createStructure  ( std::vector< float > &i_fileFloatData );
+    bool createStructure  ( std::vector< short int > &i_fileFloatData );
 	void correlate(std::vector<float>& texture, std::vector< float >& position);
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
 
-    std::vector<std::vector<float> >   m_signal; //2D containing the data
+    std::vector<std::vector<short int> >   m_signal; //2D containing the data
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
 	std::vector<std::pair< float, float > > m_meansAndSigmas;
+	float* cuData;
+	float *d_data;
 
 	bool m_isRealTimeOn;
     int m_dataType;
