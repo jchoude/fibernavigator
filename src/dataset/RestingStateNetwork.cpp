@@ -23,19 +23,19 @@
 #include <fstream>
 #include <limits>
 #include <vector>
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
+//#include <cuda.h>
+//#include <cuda_runtime.h>
+//#include <device_launch_parameters.h>
 
 //#define N (67445)
-#define M (100)
+//#define M (100)
 
-__global__ void cuCorrelation(float *buf)
-{
-	int i = threadIdx.x + blockIdx.x * blockDim.x;
-	if(i < N)
-		buf[i] = buf[i]+0.2f;
-}
+//__global__ void cuCorrelation(float *buf)
+//{
+//	int i = threadIdx.x + blockIdx.x * blockDim.x;
+//	if(i < N)
+//		buf[i] = buf[i]+0.2f;
+//}
 
 ///////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
@@ -53,7 +53,7 @@ m_bands( 108 )
 RestingStateNetwork::~RestingStateNetwork()
 {
     Logger::getInstance()->print( wxT( "RestingStateNetwork destructor called but nothing to do." ), LOGLEVEL_DEBUG );
-	cudaFree(d_data);
+	//cudaFree(d_data);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -227,53 +227,53 @@ void RestingStateNetwork::seedBased()
 void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<float>& positions)
 {
 	 //float data[N]; int count = 0;
-	int N = m_rows * m_columns * m_bands;
-	cuData = new float[m_rows][m_columns];
-	for(int i =0; i<N;i++)
-		cuData[i] = i+0.1f;
+	//int N = m_rows * m_columns * m_bands;
+	//cuData = new float[m_rows][m_columns];
+	//for(int i =0; i<N;i++)
+	//	cuData[i] = i+0.1f;
 
-	std::cout << "Before: " << cuData[1];
-	cudaMalloc(&d_data, N * sizeof(float));
-	cudaMemcpy(d_data, cuData, N * sizeof(float), cudaMemcpyHostToDevice);
-	int block_size = 512;
-	int n_blocks = N/block_size + (N%block_size == 0 ? 0:1);
-	cuCorrelation<<<n_blocks,block_size>>>(d_data);
-    cudaMemcpy(cuData, d_data, N * sizeof(float), cudaMemcpyDeviceToHost);
-     
-	std::cout <<"after " << cuData[1];
+	//std::cout << "Before: " << cuData[1];
+	//cudaMalloc(&d_data, N * sizeof(float));
+	//cudaMemcpy(d_data, cuData, N * sizeof(float), cudaMemcpyHostToDevice);
+	//int block_size = 512;
+	//int n_blocks = N/block_size + (N%block_size == 0 ? 0:1);
+	//cuCorrelation<<<n_blocks,block_size>>>(d_data);
+ //   cudaMemcpy(cuData, d_data, N * sizeof(float), cudaMemcpyDeviceToHost);
+ //    
+	//std::cout <<"after " << cuData[1];
 
-	////Mean signal inside box
-	//std::vector<float> meanSignal;
-	//for(int i=0; i < m_bands; i++)
-	//{
-	//	float sum = 0;
-	//	for(unsigned int j=0; j < positions.size(); j++)
-	//	{	
-	//		int idx = positions[j];
-	//		sum += m_signalNormalized[idx][i];
-	//	}
-	//	sum /= positions.size();
-	//	meanSignal.push_back( sum );
-	//}
+	//Mean signal inside box
+	std::vector<float> meanSignal;
+	for(int i=0; i < m_bands; i++)
+	{
+		float sum = 0;
+		for(unsigned int j=0; j < positions.size(); j++)
+		{	
+			int idx = positions[j];
+			sum += m_signalNormalized[idx][i];
+		}
+		sum /= positions.size();
+		meanSignal.push_back( sum );
+	}
 
-	////Get mean and sigma of it
-	//std::pair<float, float> RefMeanAndSigma;
-	//calculateMeanAndSigma(meanSignal, RefMeanAndSigma);
+	//Get mean and sigma of it
+	std::pair<float, float> RefMeanAndSigma;
+	calculateMeanAndSigma(meanSignal, RefMeanAndSigma);
 
-	//for(int i = 0; i < m_datasetSize; i++)
-	//{
-	//	float num = 0.0f;
-	//	float denum = 0.0f;
-	//	for(int j = 0; j < m_bands; j++)
-	//	{
-	//		num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
-	//	}
-	//	float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
-	//	value /= (m_bands - 1);
-	//	
-	//	if(value > 0.8)
-	//		texture[i] = value*256;
-	//}
+	for(int i = 0; i < m_datasetSize; i++)
+	{
+		float num = 0.0f;
+		float denum = 0.0f;
+		for(int j = 0; j < m_bands; j++)
+		{
+			num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
+		}
+		float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
+		value /= (m_bands - 1);
+		
+		if(value > 0.8)
+			texture[i] = value*256;
+	}
 }
 
 void RestingStateNetwork::calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params)
