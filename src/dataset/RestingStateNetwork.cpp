@@ -145,7 +145,10 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
     {
 		for( int b(0); b < m_bands; ++b )
 		{
-			m_signalNormalized[s].push_back ((m_signal[s][b] - dataMin[s]) / (dataMax[s] - dataMin[s]));
+			if(m_signal[s][b] == 0 && dataMin[s] == 0) //Ensure that we dont divide by 0.
+				m_signalNormalized[s].push_back(0);
+			else
+				m_signalNormalized[s].push_back ((m_signal[s][b] - dataMin[s]) / (dataMax[s] - dataMin[s]));
 		}
     }
 	
@@ -296,6 +299,5 @@ void RestingStateNetwork::calculateMeanAndSigma(std::vector<float> signal, std::
     sigma /= signal.size();
 
 	params.first = mean;
-	params.second = sigma;
-
+	params.second = sqrt(sigma);
 }
