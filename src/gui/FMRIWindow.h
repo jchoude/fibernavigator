@@ -39,6 +39,7 @@ public:
 	void onSwitchViewNet					   ( wxCommandEvent& event );
 	void OnSliderRestMoved                     ( wxCommandEvent& event );
 	void OnStartRTFMRI					       ( wxCommandEvent& event );
+	void OnSliderCorrThreshMoved			   ( wxCommandEvent& event );
 	
 	
 	
@@ -53,6 +54,9 @@ private:
 	wxStaticText        *m_pTextDisplayMode;
 	wxBoxSizer          *m_pBoxDisplayRadios;
 	wxToggleButton      *m_pBtnStart;
+	wxSlider            *m_pSliderCorrThreshold;
+	wxTextCtrl          *m_pTxtCorrThreshBox;
+    wxStaticText        *m_pTextCorrThreshold;
 
 	bool showRawData;
     

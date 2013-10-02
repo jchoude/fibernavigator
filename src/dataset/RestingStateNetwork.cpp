@@ -41,7 +41,8 @@
 RestingStateNetwork::RestingStateNetwork():
 m_isRealTimeOn( false ),
 m_dataType( 16 ),
-m_bands( 108 )
+m_bands( 108 ),
+m_CorrThreshold( 0.8f )
 {
 	m_rows = DatasetManager::getInstance()->getRows();
 	m_columns = DatasetManager::getInstance()->getColumns();
@@ -64,6 +65,10 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	m_columns = pHeader->dim[2];
 	m_frames = pHeader->dim[3];
 	m_bands = pHeader->dim[4];
+
+    m_voxelSizeX = pHeader->dx;
+    m_voxelSizeY = pHeader->dy;
+    m_voxelSizeZ = pHeader->dz;
     
 	std::vector<short int> fileFloatData( m_datasetSize * m_bands, 0.0f);
 	//cuData = new short int[m_datasetSize*m_bands];
@@ -263,19 +268,36 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 	std::pair<float, float> RefMeanAndSigma;
 	calculateMeanAndSigma(meanSignal, RefMeanAndSigma);
 
-	for(int i = 0; i < m_datasetSize; i++)
+for( float x = 0; x < m_rows; x++)
 	{
-		float num = 0.0f;
-		float denum = 0.0f;
-		for(int j = 0; j < m_bands; j++)
+		for( float y = 0; y < m_columns; y++)
 		{
-			num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
-		}
-		float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
-		value /= (m_bands - 1);
+			for( float z = 0; z < m_frames; z++)
+			{
+				float num = 0.0f;
+				float denum = 0.0f;
+				int i = z * m_columns * m_rows + y *m_columns + x;
+
+				for(int j = 0; j < m_bands; j++)
+				{
+					num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
+				}
+				float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
+				value /= (m_bands - 1);
 		
-		if(value > 0.8)
-			texture[i] = value*256;
+				if(value > m_CorrThreshold)
+				{
+					texture[i] = value;
+					//glEnable(GL_POINT_SPRITE);
+					//glPointSize(10.0f);
+					//glColor3f(1,0,0);
+					//glBegin(GL_POINTS);
+					//	glVertex3f(x*m_voxelSizeX,y*m_voxelSizeY,z*m_voxelSizeZ);
+					//glEnd();
+
+				}
+			}
+		}
 	}
 }
 
