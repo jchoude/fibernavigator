@@ -42,7 +42,8 @@ RestingStateNetwork::RestingStateNetwork():
 m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
-m_CorrThreshold( 0.8f )
+m_corrThreshold( 3.0f ),
+m_colorSliderValue( 5.0f )
 {
 	m_rows = DatasetManager::getInstance()->getRows();
 	m_columns = DatasetManager::getInstance()->getColumns();
@@ -267,6 +268,10 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 	//Get mean and sigma of it
 	std::pair<float, float> RefMeanAndSigma;
 	calculateMeanAndSigma(meanSignal, RefMeanAndSigma);
+	std::vector<float> corrFactors;
+	corrFactors.assign(m_datasetSize, 0.0f);
+	float corrSum = 0.0f;
+	int nb = 0;
 
 for( float x = 0; x < m_rows; x++)
 	{
@@ -274,27 +279,72 @@ for( float x = 0; x < m_rows; x++)
 		{
 			for( float z = 0; z < m_frames; z++)
 			{
-				float num = 0.0f;
-				float denum = 0.0f;
 				int i = z * m_columns * m_rows + y *m_columns + x;
-
-				for(int j = 0; j < m_bands; j++)
+				if(m_meansAndSigmas[i].first != 0)
 				{
-					num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
+					float num = 0.0f;
+					float denum = 0.0f;
+					
+					for(int j = 0; j < m_bands; j++)
+					{
+						num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
+					}
+					float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
+					value /= (m_bands - 1);
+				
+					corrSum+=value;
+					corrFactors[i] = value;
+					nb++;
+					//texture[i] = value;
 				}
-				float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
-				value /= (m_bands - 1);
-		
-				if(value > m_CorrThreshold)
-				{
-					texture[i] = value;
-					//glEnable(GL_POINT_SPRITE);
-					//glPointSize(10.0f);
-					//glColor3f(1,0,0);
-					//glBegin(GL_POINTS);
-					//	glVertex3f(x*m_voxelSizeX,y*m_voxelSizeY,z*m_voxelSizeZ);
-					//glEnd();
+				else
+					corrFactors[i] = 0.0f;
+				
+				//if(value > m_corrThreshold)
+				//{
+				//	texture[i] = value;
+				//	//glEnable(GL_POINT_SPRITE);
+				//	//glPointSize(10.0f);
+				//	//glColor3f(1,0,0);
+				//	//glBegin(GL_POINTS);
+				//	//	glVertex3f(x*m_voxelSizeX,y*m_voxelSizeY,z*m_voxelSizeZ);
+				//	//glEnd();
 
+				//}
+			}
+		}
+	}
+float meanCorr = corrSum / nb;
+float sigma = 0.0f;
+for( float x = 0; x < m_rows; x++)
+	{
+		for( float y = 0; y < m_columns; y++)
+		{
+			for( float z = 0; z < m_frames; z++)
+			{
+				int i = z * m_columns * m_rows + y *m_columns + x;
+				if(corrFactors[i] != 0)
+				{
+					sigma += sqrt((corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr));	
+				}		
+			}
+		}
+	}
+
+sigma /= nb;
+
+for( float x = 0; x < m_rows; x++)
+	{
+		for( float y = 0; y < m_columns; y++)
+		{
+			for( float z = 0; z < m_frames; z++)
+			{
+				int i = z * m_columns * m_rows + y *m_columns + x;
+				if(corrFactors[i] != 0)
+				{
+					float zScore = (corrFactors[i] - meanCorr) / sigma;
+					if(zScore > m_corrThreshold)
+							texture[i] = zScore/m_colorSliderValue;
 				}
 			}
 		}

@@ -22,7 +22,8 @@ public:
 	void setNetworkInfo( DatasetIndex index ) { m_index = index; }
 	void SetTextureFromSlider( int sliderValue );
 	void SetTextureFromNetwork();
-	void SetCorrThreshold( float thresh ) { m_CorrThreshold = thresh; }
+	void SetCorrThreshold( float thresh ) { m_corrThreshold = thresh; }
+	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
 	
 	void seedBased();
 
@@ -59,7 +60,8 @@ private:
     float m_voxelSizeY;
     float m_voxelSizeZ;
 	DatasetIndex m_index;
-	float m_CorrThreshold;
+	float m_corrThreshold;
+	float m_colorSliderValue;
 
 };
 
