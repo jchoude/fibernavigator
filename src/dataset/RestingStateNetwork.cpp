@@ -71,12 +71,13 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
     m_voxelSizeY = pHeader->dy;
     m_voxelSizeZ = pHeader->dz;
     
-	std::vector<short int> fileFloatData( m_datasetSize * m_bands, 0.0f);
+	std::vector<short int> fileFloatData( m_datasetSize * m_bands, 0);
 	//cuData = new short int[m_datasetSize*m_bands];
 
 	if(pHeader->datatype == 4)
 	{
 		short int* pData = (short int*)pBody->data;
+		
 		//Prepare the data into a 1D vector, side by side
 		for( int i( 0 ); i < m_datasetSize; ++i )
 		{
@@ -100,6 +101,7 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 					fileFloatData[i * m_bands + j] = pData[j * m_datasetSize + i];
 			}
 		}
+		
 	}
 	//std::cout << "Before: " << cuData[2000];
 	//cudaMalloc(&d_data, m_datasetSize * m_bands * sizeof(short int));
@@ -151,7 +153,7 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
     {
 		for( int b(0); b < m_bands; ++b )
 		{
-			if(m_signal[s][b] == 0 && dataMin[s] == 0) //Ensure that we dont divide by 0.
+			if((m_signal[s][b] == 0 && dataMin[s] == 0) || (m_signal[s][b] == 16767 && dataMin[s] == 16767)) //Ensure that we dont divide by 0.
 				m_signalNormalized[s].push_back(0);
 			else
 				m_signalNormalized[s].push_back ((m_signal[s][b] - dataMin[s]) / (dataMax[s] - dataMin[s]));
@@ -273,9 +275,9 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 	float corrSum = 0.0f;
 	int nb = 0;
 
-for( float x = 0; x < m_rows; x++)
+for( float x = 0; x < m_columns; x++)
 	{
-		for( float y = 0; y < m_columns; y++)
+		for( float y = 0; y < m_rows; y++)
 		{
 			for( float z = 0; z < m_frames; z++)
 			{
@@ -316,9 +318,9 @@ for( float x = 0; x < m_rows; x++)
 	}
 float meanCorr = corrSum / nb;
 float sigma = 0.0f;
-for( float x = 0; x < m_rows; x++)
+for( float x = 0; x < m_columns; x++)
 	{
-		for( float y = 0; y < m_columns; y++)
+		for( float y = 0; y < m_rows; y++)
 		{
 			for( float z = 0; z < m_frames; z++)
 			{
@@ -333,9 +335,9 @@ for( float x = 0; x < m_rows; x++)
 
 sigma /= nb;
 
-for( float x = 0; x < m_rows; x++)
+for( float x = 0; x < m_columns; x++)
 	{
-		for( float y = 0; y < m_columns; y++)
+		for( float y = 0; y < m_rows; y++)
 		{
 			for( float z = 0; z < m_frames; z++)
 			{

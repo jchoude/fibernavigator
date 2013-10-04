@@ -90,7 +90,7 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 
 	m_pTextColorMap = new wxStaticText( this, wxID_ANY, wxT("Max Z-Color range"), wxPoint(0,210), wxSize(60, -1), wxALIGN_CENTER );
 	m_pSliderColorMap = new MySlider( this, wxID_ANY, 0, 1, 100, wxPoint(60,210), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderColorMap->SetValue( 5 );
+	m_pSliderColorMap->SetValue( 50 );
 	Connect( m_pSliderColorMap->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderColorMoved) );
     m_pTxtColorMapBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxPoint(190,210), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
