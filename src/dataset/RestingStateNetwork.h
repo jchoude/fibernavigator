@@ -24,8 +24,10 @@ public:
 	void SetTextureFromNetwork();
 	void SetCorrThreshold( float thresh ) { m_corrThreshold = thresh; }
 	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
+	void render3D();
 	
 	void seedBased();
+	size_t getSize()                                  { return m_3Dpoints.size(); }
 
 	std::vector<std::vector<short int> >* getSignal() { return &m_signal; }
 	DatasetIndex getIndex()   { return m_index; }
@@ -40,11 +42,13 @@ private:
     bool createStructure  ( std::vector< short int > &i_fileFloatData );
 	void correlate(std::vector<float>& texture, std::vector< float >& position);
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
+	
 
     std::vector<std::vector<short int> >   m_signal; //2D containing the data
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
 	std::vector<std::pair< float, float > > m_meansAndSigmas;
+	std::vector<std::pair<Vector,float> > m_3Dpoints;
 	float* cuData;
 	float *d_data;
 

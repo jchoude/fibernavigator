@@ -194,6 +194,7 @@ void RestingStateNetwork::SetTextureFromNetwork()
 
 void RestingStateNetwork::seedBased()
 {
+	m_3Dpoints.clear();
 	std::vector<float> texture(m_datasetSize, 0.0f);
 	 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
@@ -229,12 +230,28 @@ void RestingStateNetwork::seedBased()
 		correlate(texture, positions);
 	}
 	
+	render3D();
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
 	pNewAnatomy->setFloatDataset(texture);
 	pNewAnatomy->generateTexture();
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
 }
 
+void RestingStateNetwork::render3D()
+{
+	if( m_3Dpoints.size() > 0 )
+    {
+		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
+		{
+			glEnable(GL_POINT_SPRITE);
+			glPointSize(m_3Dpoints[s].second*10.0f);
+			glColor3f(m_3Dpoints[s].second/m_colorSliderValue,0,0);
+			glBegin(GL_POINTS);
+				glVertex3f(m_3Dpoints[s].first.x * m_voxelSizeX, m_3Dpoints[s].first.y * m_voxelSizeY, m_3Dpoints[s].first.z * m_voxelSizeZ);
+			glEnd();
+		}
+	}
+}
 void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<float>& positions)
 {
 	 //float data[N]; int count = 0;
@@ -275,7 +292,8 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 	float corrSum = 0.0f;
 	int nb = 0;
 
-for( float x = 0; x < m_columns; x++)
+	//Correlate with rest of the brain, i.e find corr factors
+	for( float x = 0; x < m_columns; x++)
 	{
 		for( float y = 0; y < m_rows; y++)
 		{
@@ -297,28 +315,17 @@ for( float x = 0; x < m_columns; x++)
 					corrSum+=value;
 					corrFactors[i] = value;
 					nb++;
-					//texture[i] = value;
 				}
 				else
 					corrFactors[i] = 0.0f;
-				
-				//if(value > m_corrThreshold)
-				//{
-				//	texture[i] = value;
-				//	//glEnable(GL_POINT_SPRITE);
-				//	//glPointSize(10.0f);
-				//	//glColor3f(1,0,0);
-				//	//glBegin(GL_POINTS);
-				//	//	glVertex3f(x*m_voxelSizeX,y*m_voxelSizeY,z*m_voxelSizeZ);
-				//	//glEnd();
-
-				//}
 			}
 		}
 	}
-float meanCorr = corrSum / nb;
-float sigma = 0.0f;
-for( float x = 0; x < m_columns; x++)
+
+	//Find mean and sigma of all corr factors.
+	float meanCorr = corrSum / nb;
+	float sigma = 0.0f;
+	for( float x = 0; x < m_columns; x++)
 	{
 		for( float y = 0; y < m_rows; y++)
 		{
@@ -333,9 +340,9 @@ for( float x = 0; x < m_columns; x++)
 		}
 	}
 
-sigma /= nb;
-
-for( float x = 0; x < m_columns; x++)
+	//Calculate z-scores, and write into texture.
+	sigma /= nb;
+	for( float x = 0; x < m_columns; x++)
 	{
 		for( float y = 0; y < m_rows; y++)
 		{
@@ -346,7 +353,10 @@ for( float x = 0; x < m_columns; x++)
 				{
 					float zScore = (corrFactors[i] - meanCorr) / sigma;
 					if(zScore > m_corrThreshold)
-							texture[i] = zScore/m_colorSliderValue;
+					{
+						texture[i] = zScore/m_colorSliderValue;
+						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
+					}
 				}
 			}
 		}

@@ -706,7 +706,7 @@ void MainCanvas::render()
             {
                 // TODO: Get Max size supported by the Graphic Card and use it instead of default 2048 value
                 // FIXME: Screenshot crashes the GUI
-                int size = 2048;
+                int size = 4096;
 
                 FgeOffscreen fbo( size, size, true );
                 if( SceneManager::getInstance()->getClearToBlack() )
@@ -803,6 +803,10 @@ void MainCanvas::render()
                 {	
 					DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
                 }
+				else if(DatasetManager::getInstance()->m_pRestingStateNetwork->getSize() > 0)
+				{
+					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D();
+				}
 
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );
