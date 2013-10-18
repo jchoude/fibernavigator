@@ -23,6 +23,12 @@
 #include <fstream>
 #include <limits>
 #include <vector>
+
+#include "../gfx/Image.h"
+#include "../gfx/BitmapHandling.h"
+#include "../gfx/TextureHandling.h"
+#include "../main.h"
+
 //#include <cuda.h>
 //#include <cuda_runtime.h>
 //#include <device_launch_parameters.h>
@@ -112,6 +118,19 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	//Assign structure to a 2D vector of timelaps
     createStructure( fileFloatData );
 
+
+	//Load fMRI sprite texture.
+	Image<ColorRGB> TmpImage;
+	wxString name = wxT ("fMRI.bmp");
+
+	wxString iconPath = MyApp::iconsPath;
+	wxString fullname = iconPath.append(name);
+	std::string stlstring = std::string(fullname.mb_str());
+	
+    //Load the color scheme #1 image and send it to the GPU as a texture.
+    LoadBmp(stlstring,TmpImage);
+    unsigned int test = LoadTexture(TmpImage);
+	cout << test;
 	Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
     return true;
 }
