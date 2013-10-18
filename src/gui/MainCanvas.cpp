@@ -803,10 +803,10 @@ void MainCanvas::render()
                 {	
 					DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
                 }
-			/*	else if(DatasetManager::getInstance()->m_pRestingStateNetwork->getSize() > 0)
+				else if(RTFMRIHelper::getInstance()->isRTFMRIActive())
 				{
 					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D();
-				}*/
+				}
 
                 //save context for picking
                 glGetDoublev( GL_PROJECTION_MATRIX, m_projection );

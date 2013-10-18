@@ -7,7 +7,7 @@
 #include "Tensors.h"
 #include "Maximas.h"
 #include "RestingStateNetwork.h"
-
+#include "RTFMRIHelper.h"
 #include "../Logger.h"
 #include "../gui/SceneManager.h"
 #include "../gui/SelectionTree.h"
@@ -596,6 +596,7 @@ DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_i
     Logger::getInstance()->print( wxT( "Loading resting-state profile" ), LOGLEVEL_MESSAGE );
 	Anatomy *pAnatomy = new Anatomy( filename, OVERLAY ); //OVERLAY
 	m_pRestingStateNetwork = new RestingStateNetwork();
+	RTFMRIHelper::getInstance()->setRTFMRIActive(true);
     if( m_pRestingStateNetwork->load( pHeader, pBody ) )
     {
         Logger::getInstance()->print( wxT( "Assigning attributes" ), LOGLEVEL_DEBUG );
