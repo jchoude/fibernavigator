@@ -41,6 +41,7 @@ public:
 	void OnStartRTFMRI					       ( wxCommandEvent& event );
 	void OnSliderCorrThreshMoved			   ( wxCommandEvent& event );
 	void OnSliderColorMoved					   ( wxCommandEvent& event );
+	void OnSliderSizePMoved					   ( wxCommandEvent& event );
 	
 	
 	
@@ -61,6 +62,9 @@ private:
 	wxSlider            *m_pSliderColorMap;
 	wxTextCtrl          *m_pTxtColorMapBox;
     wxStaticText        *m_pTextColorMap;
+	wxSlider            *m_pSliderSizeP;
+	wxTextCtrl          *m_pTxtSizePBox;
+    wxStaticText        *m_pTextSizeP;
 
 	bool showRawData;
     

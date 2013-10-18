@@ -40,10 +40,14 @@
 ///////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
 m_isRealTimeOn( false ),
+m_zMin( 999.0f ),
 m_dataType( 16 ),
 m_bands( 108 ),
 m_corrThreshold( 3.0f ),
-m_colorSliderValue( 5.0f )
+m_colorSliderValue( 5.0f ),
+m_zMax( 0.0f ),
+m_alpha( 1.0f),
+m_pointSize( 10.0f )
 {
 	m_rows = DatasetManager::getInstance()->getRows();
 	m_columns = DatasetManager::getInstance()->getColumns();
@@ -195,6 +199,8 @@ void RestingStateNetwork::SetTextureFromNetwork()
 void RestingStateNetwork::seedBased()
 {
 	m_3Dpoints.clear();
+	m_zMin = 999.0f;
+	m_zMax = 0.0f;
 	std::vector<float> texture(m_datasetSize, 0.0f);
 	 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
@@ -230,6 +236,15 @@ void RestingStateNetwork::seedBased()
 		correlate(texture, positions);
 	}
 	
+	//normalize min/max
+    for( int s(0); s < m_3Dpoints.size(); ++s )
+    {
+		m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
+
+		int i = m_3Dpoints[s].first.z * m_columns * m_rows + m_3Dpoints[s].first.y *m_columns + m_3Dpoints[s].first.x; 
+		texture[i] = (texture[i] - m_zMin) / (m_zMax - m_zMin);
+    }
+
 	render3D();
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
 	pNewAnatomy->setFloatDataset(texture);
@@ -243,12 +258,36 @@ void RestingStateNetwork::render3D()
     {
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
+			int R,G,B;
+			if(m_3Dpoints[s].second < 0.25f)
+			{
+				R = m_3Dpoints[s].second / 0.25f;
+				G = 0.0f;
+				B = 0.0f;
+			}
+			else if(m_3Dpoints[s].second < 0.75f && m_3Dpoints[s].second > 0.25f)
+			{
+				R = 1.0;
+				G = (m_3Dpoints[s].second - 0.25f) / 0.5f;
+				B = 0.0f;
+			}
+			else if(m_3Dpoints[s].second > 0.75f)
+			{
+				R = 1.0f;
+				G = 1.0f;
+				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
+			}
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
-			glPointSize(m_3Dpoints[s].second*10.0f);
-			glColor3f(m_3Dpoints[s].second/m_colorSliderValue,0,0);
+			glPointSize(m_3Dpoints[s].second*m_pointSize);
+			//glColor4f(m_3Dpoints[s].second/m_colorSliderValue,1-m_3Dpoints[s].second/m_colorSliderValue,0,m_3Dpoints[s].second/10.0f);
+			glColor4f(R,G,B,m_3Dpoints[s].second/m_alpha);
 			glBegin(GL_POINTS);
 				glVertex3f(m_3Dpoints[s].first.x * m_voxelSizeX, m_3Dpoints[s].first.y * m_voxelSizeY, m_3Dpoints[s].first.z * m_voxelSizeZ);
 			glEnd();
+			glDisable(GL_BLEND);
 		}
 	}
 }
@@ -354,7 +393,12 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 					float zScore = (corrFactors[i] - meanCorr) / sigma;
 					if(zScore > m_corrThreshold)
 					{
-						texture[i] = zScore/m_colorSliderValue;
+						if(zScore < m_zMin)
+							m_zMin = zScore;
+						if(zScore > m_zMax)
+							m_zMax = zScore;
+
+						texture[i] = zScore;//m_colorSliderValue;
 						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
 					}
 				}

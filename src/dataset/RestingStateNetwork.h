@@ -24,10 +24,11 @@ public:
 	void SetTextureFromNetwork();
 	void SetCorrThreshold( float thresh ) { m_corrThreshold = thresh; }
 	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
+	void SetSizePSliderValue (float value ) { m_pointSize = value; }
 	void render3D();
-	
 	void seedBased();
-	size_t getSize()                                  { return m_3Dpoints.size(); }
+	size_t getSize()                               { return m_3Dpoints.size(); }
+	void clear3DPoints()                           { m_3Dpoints.clear(); }
 
 	std::vector<std::vector<short int> >* getSignal() { return &m_signal; }
 	DatasetIndex getIndex()   { return m_index; }
@@ -49,6 +50,12 @@ private:
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
 	std::vector<std::pair< float, float > > m_meansAndSigmas;
 	std::vector<std::pair<Vector,float> > m_3Dpoints;
+	
+	float m_zMin;
+	float m_zMax;
+	float m_alpha;
+	float m_pointSize;
+
 	float* cuData;
 	float *d_data;
 

@@ -99,6 +99,18 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     pBoxRow6->Add( m_pSliderColorMap,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
 	pBoxRow6->Add( m_pTxtColorMapBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow6, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+	m_pTextSizeP = new wxStaticText( this, wxID_ANY, wxT("Point size"), wxPoint(0,240), wxSize(60, -1), wxALIGN_CENTER );
+	m_pSliderSizeP = new MySlider( this, wxID_ANY, 0, 1, 100, wxPoint(60,240), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderSizeP->SetValue( 10 );
+	Connect( m_pSliderSizeP->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderSizePMoved) );
+    m_pTxtSizePBox = new wxTextCtrl( this, wxID_ANY, wxT("10.0"), wxPoint(190,240), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+	wxBoxSizer *pBoxRow7 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow7->Add( m_pTextSizeP, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxRow7->Add( m_pSliderSizeP,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
+	pBoxRow7->Add( m_pTxtSizePBox,   0, wxALIGN_LEFT | wxALL, 1);
+	m_pFMRISizer->Add( pBoxRow7, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 }
 
 void FMRIWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -175,6 +187,14 @@ void FMRIWindow::OnSliderColorMoved(  wxCommandEvent& WXUNUSED(event) )
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 
+void FMRIWindow::OnSliderSizePMoved(  wxCommandEvent& WXUNUSED(event) )
+{
+	float sliderValue = m_pSliderSizeP->GetValue();
+	m_pTxtSizePBox->SetValue( wxString::Format( wxT( "%.1f"), sliderValue ) );
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetSizePSliderValue( sliderValue );
+	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
+}
+
 void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
 {
 	RTFMRIHelper::getInstance()->toggleRTFMRIReady();
@@ -182,8 +202,7 @@ void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
 
     if( !RTFMRIHelper::getInstance()->isRTFMRIReady() )
     {
-        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearFibersRTT();
-        //m_pMainFrame->m_pMainGL->m_pRealTimeFibers->clearColorsRTT();
+		DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
         RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
         m_pBtnStart->SetLabel(wxT("Start correlation"));
     }
