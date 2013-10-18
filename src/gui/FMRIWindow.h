@@ -42,6 +42,7 @@ public:
 	void OnSliderCorrThreshMoved			   ( wxCommandEvent& event );
 	void OnSliderColorMoved					   ( wxCommandEvent& event );
 	void OnSliderSizePMoved					   ( wxCommandEvent& event );
+	void OnSliderAlphaMoved					   ( wxCommandEvent& event );
 	
 	
 	
@@ -65,6 +66,9 @@ private:
 	wxSlider            *m_pSliderSizeP;
 	wxTextCtrl          *m_pTxtSizePBox;
     wxStaticText        *m_pTextSizeP;
+	wxSlider            *m_pSliderAlpha;
+	wxTextCtrl          *m_pTxtAlphaBox;
+    wxStaticText        *m_pTextAlpha;
 
 	bool showRawData;
     

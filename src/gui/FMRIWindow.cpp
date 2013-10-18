@@ -56,8 +56,8 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow2->Add( m_pRadShowNetwork, 0, wxALIGN_CENTER, 1 );
 	m_pFMRISizer->Add( pBoxRow2, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
-	m_pTextVolumeId = new wxStaticText( this, wxID_ANY, wxT("Volume"), wxPoint(0,120), wxSize(60, -1), wxALIGN_CENTER );
-	m_pSliderRest = new MySlider( this, wxID_ANY, 0, 0, 107, wxPoint(60,120), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pTextVolumeId = new wxStaticText( this, wxID_ANY, wxT("Volume"), wxPoint(0,120), wxSize(70, -1), wxALIGN_CENTER );
+	m_pSliderRest = new MySlider( this, wxID_ANY, 0, 0, 107, wxPoint(60,120), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderRest->Disable();
 	Connect( m_pSliderRest->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderRestMoved) );
     m_pTxtRestBox = new wxTextCtrl( this, wxID_ANY, wxT("0"), wxPoint(190,120), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
@@ -76,8 +76,8 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow4->Add( m_pBtnStart, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 1 );
 	m_pFMRISizer->Add( pBoxRow4, 0, wxFIXED_MINSIZE | wxALL, 2 );
 
-	m_pTextCorrThreshold = new wxStaticText( this, wxID_ANY, wxT("Z-Threshold"), wxPoint(0,180), wxSize(60, -1), wxALIGN_CENTER );
-	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 1, 150, wxPoint(60,180), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pTextCorrThreshold = new wxStaticText( this, wxID_ANY, wxT("Z-Threshold"), wxPoint(0,180), wxSize(70, -1), wxALIGN_CENTER );
+	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 1, 150, wxPoint(60,180), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderCorrThreshold->SetValue( 30 );
 	Connect( m_pSliderCorrThreshold->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderCorrThreshMoved) );
     m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("3.0"), wxPoint(190,180), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
@@ -88,8 +88,8 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow5->Add( m_pTxtCorrThreshBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow5, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-	m_pTextColorMap = new wxStaticText( this, wxID_ANY, wxT("Max Z-Color range"), wxPoint(0,210), wxSize(60, -1), wxALIGN_CENTER );
-	m_pSliderColorMap = new MySlider( this, wxID_ANY, 0, 1, 100, wxPoint(60,210), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pTextColorMap = new wxStaticText( this, wxID_ANY, wxT("Max Z-Color range"), wxPoint(0,210), wxSize(70, -1), wxALIGN_CENTER );
+	m_pSliderColorMap = new MySlider( this, wxID_ANY, 0, 1, 100, wxPoint(60,210), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderColorMap->SetValue( 50 );
 	Connect( m_pSliderColorMap->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderColorMoved) );
     m_pTxtColorMapBox = new wxTextCtrl( this, wxID_ANY, wxT("5.0"), wxPoint(190,210), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
@@ -100,8 +100,8 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	pBoxRow6->Add( m_pTxtColorMapBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow6, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
-	m_pTextSizeP = new wxStaticText( this, wxID_ANY, wxT("Point size"), wxPoint(0,240), wxSize(60, -1), wxALIGN_CENTER );
-	m_pSliderSizeP = new MySlider( this, wxID_ANY, 0, 1, 100, wxPoint(60,240), wxSize(130, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pTextSizeP = new wxStaticText( this, wxID_ANY, wxT("Point size"), wxPoint(0,240), wxSize(70, -1), wxALIGN_CENTER );
+	m_pSliderSizeP = new MySlider( this, wxID_ANY, 0, 1, 100, wxPoint(60,240), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderSizeP->SetValue( 10 );
 	Connect( m_pSliderSizeP->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderSizePMoved) );
     m_pTxtSizePBox = new wxTextCtrl( this, wxID_ANY, wxT("10.0"), wxPoint(190,240), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
@@ -111,6 +111,18 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     pBoxRow7->Add( m_pSliderSizeP,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
 	pBoxRow7->Add( m_pTxtSizePBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow7, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+	m_pTextAlpha = new wxStaticText( this, wxID_ANY, wxT("Alpha blend"), wxPoint(0,270), wxSize(70, -1), wxALIGN_CENTER );
+	m_pSliderAlpha = new MySlider( this, wxID_ANY, 0, 0, 100, wxPoint(60,270), wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderAlpha->SetValue( 50 );
+	Connect( m_pSliderAlpha->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderAlphaMoved) );
+    m_pTxtAlphaBox = new wxTextCtrl( this, wxID_ANY, wxT("0.8"), wxPoint(190,270), wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
+
+	wxBoxSizer *pBoxRow8 = new wxBoxSizer( wxHORIZONTAL );
+    pBoxRow8->Add( m_pTextAlpha, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pBoxRow8->Add( m_pSliderAlpha,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
+	pBoxRow8->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
+	m_pFMRISizer->Add( pBoxRow8, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 }
 
 void FMRIWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -192,6 +204,15 @@ void FMRIWindow::OnSliderSizePMoved(  wxCommandEvent& WXUNUSED(event) )
 	float sliderValue = m_pSliderSizeP->GetValue();
 	m_pTxtSizePBox->SetValue( wxString::Format( wxT( "%.1f"), sliderValue ) );
 	DatasetManager::getInstance()->m_pRestingStateNetwork->SetSizePSliderValue( sliderValue );
+	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
+}
+
+
+void FMRIWindow::OnSliderAlphaMoved(  wxCommandEvent& WXUNUSED(event) )
+{
+	float sliderValue = m_pSliderAlpha->GetValue() / 100.0f;
+	m_pTxtAlphaBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetAlphaSliderValue( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
 }
 

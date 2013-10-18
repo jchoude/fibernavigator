@@ -25,6 +25,7 @@ public:
 	void SetCorrThreshold( float thresh ) { m_corrThreshold = thresh; }
 	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
 	void SetSizePSliderValue (float value ) { m_pointSize = value; }
+	void SetAlphaSliderValue (float value ) { m_alpha = value; }
 	void render3D();
 	void seedBased();
 	size_t getSize()                               { return m_3Dpoints.size(); }

@@ -341,7 +341,7 @@ void MainFrame::initLayout()
     m_pTrackingWindowHardi->SetScrollbars( 10, 10, 50, 50 );
     m_pTrackingWindowHardi->EnableScrolling( true, true );
 
-	m_pFMRIWindow = new FMRIWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT )); // Contains realtime tracking properties
+	m_pFMRIWindow = new FMRIWindow( m_tab, this, wxID_ANY, wxDefaultPosition, wxSize( PROP_WND_WIDTH, PROP_WND_HEIGHT )); // Contains realtime fmri properties
     m_pFMRIWindow->SetScrollbars( 10, 10, 50, 50 );
     m_pFMRIWindow->EnableScrolling( true, true );
 

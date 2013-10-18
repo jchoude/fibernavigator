@@ -39,20 +39,19 @@
 
 ///////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
-m_isRealTimeOn( false ),
 m_zMin( 999.0f ),
+m_zMax( 0.0f ),
+m_alpha( 0.5f),
+m_pointSize( 10.0f ),
+m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
 m_corrThreshold( 3.0f ),
-m_colorSliderValue( 5.0f ),
-m_zMax( 0.0f ),
-m_alpha( 1.0f),
-m_pointSize( 10.0f )
+m_colorSliderValue( 5.0f )
 {
 	m_rows = DatasetManager::getInstance()->getRows();
 	m_columns = DatasetManager::getInstance()->getColumns();
 	m_frames =  DatasetManager::getInstance()->getFrames();
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -237,7 +236,7 @@ void RestingStateNetwork::seedBased()
 	}
 	
 	//normalize min/max
-    for( int s(0); s < m_3Dpoints.size(); ++s )
+    for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
     {
 		m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
 
@@ -256,6 +255,7 @@ void RestingStateNetwork::render3D()
 {
 	if( m_3Dpoints.size() > 0 )
     {
+		//Apply ColorMap
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
 			int R,G,B;
@@ -278,15 +278,24 @@ void RestingStateNetwork::render3D()
 				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
 			}
 
+
+
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
-			glPointSize(m_3Dpoints[s].second*m_pointSize);
-			//glColor4f(m_3Dpoints[s].second/m_colorSliderValue,1-m_3Dpoints[s].second/m_colorSliderValue,0,m_3Dpoints[s].second/10.0f);
-			glColor4f(R,G,B,m_3Dpoints[s].second/m_alpha);
+			glPointSize(m_3Dpoints[s].second * m_pointSize + 1.0f);
+
+			//glActiveTexture(GL_TEXTURE0);
+			//glEnable( GL_TEXTURE_2D );
+			//glTexEnv(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+			//glTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			//glBindTexture(GL_TEXTURE_2D, texture_name);
+
+			glColor4f(R,G,B,m_3Dpoints[s].second*m_alpha);
 			glBegin(GL_POINTS);
 				glVertex3f(m_3Dpoints[s].first.x * m_voxelSizeX, m_3Dpoints[s].first.y * m_voxelSizeY, m_3Dpoints[s].first.z * m_voxelSizeZ);
 			glEnd();
+			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
 		}
 	}
@@ -391,13 +400,12 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 				if(corrFactors[i] != 0)
 				{
 					float zScore = (corrFactors[i] - meanCorr) / sigma;
+					if(zScore < m_zMin)
+						m_zMin = zScore;
+					if(zScore > m_zMax)
+						m_zMax = zScore;
 					if(zScore > m_corrThreshold)
 					{
-						if(zScore < m_zMin)
-							m_zMin = zScore;
-						if(zScore > m_zMax)
-							m_zMax = zScore;
-
 						texture[i] = zScore;//m_colorSliderValue;
 						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
 					}
