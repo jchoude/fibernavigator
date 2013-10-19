@@ -129,8 +129,8 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	
     //Load the color scheme #1 image and send it to the GPU as a texture.
     LoadBmp(stlstring,TmpImage);
-    unsigned int test = LoadTexture(TmpImage);
-	cout << test;
+    m_lookupTex = LoadTexture(TmpImage);
+
 	Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
     return true;
 }
@@ -300,15 +300,15 @@ void RestingStateNetwork::render3D()
 
 
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
 			glPointSize(m_3Dpoints[s].second * m_pointSize + 1.0f);
 
-			//glActiveTexture(GL_TEXTURE0);
-			//glEnable( GL_TEXTURE_2D );
-			//glTexEnv(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-			//glTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			//glBindTexture(GL_TEXTURE_2D, texture_name);
+			glActiveTexture(GL_TEXTURE0);
+			glEnable( GL_TEXTURE_2D );
+			glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glBindTexture(GL_TEXTURE_2D, m_lookupTex);
 
 			glColor4f(R,G,B,m_3Dpoints[s].second*m_alpha);
 			glBegin(GL_POINTS);

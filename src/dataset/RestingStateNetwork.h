@@ -56,6 +56,7 @@ private:
 	float m_zMax;
 	float m_alpha;
 	float m_pointSize;
+	GLuint m_lookupTex;
 
 	float* cuData;
 	float *d_data;
