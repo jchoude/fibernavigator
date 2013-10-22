@@ -131,7 +131,7 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
     LoadBmp(stlstring,TmpImage);
     m_lookupTex = LoadTexture(TmpImage);
 
-	Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
+	//Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
     return true;
 }
 
@@ -277,7 +277,7 @@ void RestingStateNetwork::render3D()
 		//Apply ColorMap
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
-			int R,G,B;
+			float R,G,B;
 			if(m_3Dpoints[s].second < 0.25f)
 			{
 				R = m_3Dpoints[s].second / 0.25f;
@@ -300,17 +300,18 @@ void RestingStateNetwork::render3D()
 
 
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
 			glPointSize(m_3Dpoints[s].second * m_pointSize + 1.0f);
+			glColor4f(R,G,B,m_3Dpoints[s].second*m_alpha);
 
-			glActiveTexture(GL_TEXTURE0);
+			/*glActiveTexture(GL_TEXTURE0);
 			glEnable( GL_TEXTURE_2D );
 			glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glBindTexture(GL_TEXTURE_2D, m_lookupTex);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+			glBindTexture(GL_TEXTURE_2D, m_lookupTex);*/
 
-			glColor4f(R,G,B,m_3Dpoints[s].second*m_alpha);
+			
 			glBegin(GL_POINTS);
 				glVertex3f(m_3Dpoints[s].first.x * m_voxelSizeX, m_3Dpoints[s].first.y * m_voxelSizeY, m_3Dpoints[s].first.z * m_voxelSizeZ);
 			glEnd();
