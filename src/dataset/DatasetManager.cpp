@@ -594,7 +594,7 @@ DatasetIndex DatasetManager::loadAnatomy( const wxString &filename, nifti_image 
 DatasetIndex DatasetManager::loadRestingState( const wxString &filename, nifti_image *pHeader, nifti_image *pBody )
 {
     Logger::getInstance()->print( wxT( "Loading resting-state profile" ), LOGLEVEL_MESSAGE );
-	Anatomy *pAnatomy = new Anatomy( filename, OVERLAY ); //OVERLAY
+	Anatomy *pAnatomy = new Anatomy( filename, RGB ); //OVERLAY
 	m_pRestingStateNetwork = new RestingStateNetwork();
 	RTFMRIHelper::getInstance()->setRTFMRIActive(true);
     if( m_pRestingStateNetwork->load( pHeader, pBody ) )

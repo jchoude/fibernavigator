@@ -219,7 +219,7 @@ void RestingStateNetwork::seedBased()
 	m_3Dpoints.clear();
 	m_zMin = 999.0f;
 	m_zMax = 0.0f;
-	std::vector<float> texture(m_datasetSize, 0.0f);
+	std::vector<float> texture(m_datasetSize*3, 0.0f);
 	 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
     float yVoxel = DatasetManager::getInstance()->getVoxelY();
@@ -260,7 +260,7 @@ void RestingStateNetwork::seedBased()
 		m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
 
 		int i = m_3Dpoints[s].first.z * m_columns * m_rows + m_3Dpoints[s].first.y *m_columns + m_3Dpoints[s].first.x; 
-		texture[i] = (texture[i] - m_zMin) / (m_zMax - m_zMin);
+		texture[i*3] = (texture[i*3] - m_zMin) / (m_zMax - m_zMin);
     }
 
 	render3D();
@@ -429,7 +429,7 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 						m_zMax = zScore;
 					if(zScore > m_corrThreshold)
 					{
-						texture[i] = zScore;//m_colorSliderValue;
+						texture[i*3] = zScore;//m_colorSliderValue;
 						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
 					}
 				}

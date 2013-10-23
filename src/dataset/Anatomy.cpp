@@ -203,6 +203,14 @@ Anatomy::Anatomy( const wxString &filename, const int type )
 
         m_floatDataset.resize( m_columns * m_frames * m_rows, 0.0f );
     }
+	if(type == RGB)
+    {
+        m_bands         = 3;
+        m_isLoaded      = true;   
+        m_type          = type;
+
+        m_floatDataset.resize( m_columns * m_frames * m_rows * 3, 0.0f );
+    }
 
 	m_fullPath = filename;
 
