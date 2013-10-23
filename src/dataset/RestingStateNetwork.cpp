@@ -298,25 +298,28 @@ void RestingStateNetwork::render3D()
 			}
 
 
-
+			
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
 			glPointSize(m_3Dpoints[s].second * m_pointSize + 1.0f);
-			glColor4f(R,G,B,m_3Dpoints[s].second*m_alpha);
+			glColor4f(R,G,B,(m_3Dpoints[s].second*m_alpha) / 2.0f);
 
-			/*glActiveTexture(GL_TEXTURE0);
-			glEnable( GL_TEXTURE_2D );
-			glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
-			glBindTexture(GL_TEXTURE_2D, m_lookupTex);*/
+			//glActiveTexture(GL_TEXTURE0);
+			//glEnable( GL_TEXTURE_2D );
+			//glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+			//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+			//glBindTexture(GL_TEXTURE_2D, m_lookupTex);
 
 			
 			glBegin(GL_POINTS);
 				glVertex3f(m_3Dpoints[s].first.x * m_voxelSizeX, m_3Dpoints[s].first.y * m_voxelSizeY, m_3Dpoints[s].first.z * m_voxelSizeZ);
 			glEnd();
+
+			//glDisable( GL_TEXTURE_2D );
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
+
 		}
 	}
 }
