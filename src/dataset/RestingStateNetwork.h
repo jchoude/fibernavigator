@@ -42,7 +42,7 @@ public:
 
 private:
     bool createStructure  ( std::vector< short int > &i_fileFloatData );
-	void correlate(std::vector<float>& texture, std::vector< float >& position);
+	void correlate(std::vector< float >& position);
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
 	
 

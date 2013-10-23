@@ -219,7 +219,6 @@ void RestingStateNetwork::seedBased()
 	m_3Dpoints.clear();
 	m_zMin = 999.0f;
 	m_zMax = 0.0f;
-	std::vector<float> texture(m_datasetSize*3, 0.0f);
 	 
     float xVoxel = DatasetManager::getInstance()->getVoxelX();
     float yVoxel = DatasetManager::getInstance()->getVoxelY();
@@ -251,22 +250,17 @@ void RestingStateNetwork::seedBased()
 				}
 			}
 		}
-		correlate(texture, positions);
+		
+		correlate(positions);
 	}
 	
 	//normalize min/max
     for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
     {
 		m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
-
-		int i = m_3Dpoints[s].first.z * m_columns * m_rows + m_3Dpoints[s].first.y *m_columns + m_3Dpoints[s].first.x; 
-		texture[i*3] = (texture[i*3] - m_zMin) / (m_zMax - m_zMin);
     }
 
 	render3D();
-	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-	pNewAnatomy->setFloatDataset(texture);
-	pNewAnatomy->generateTexture();
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
 }
 
@@ -274,6 +268,7 @@ void RestingStateNetwork::render3D()
 {
 	if( m_3Dpoints.size() > 0 )
     {
+		std::vector<float> texture(m_datasetSize*3, 0.0f);
 		//Apply ColorMap
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
@@ -297,8 +292,6 @@ void RestingStateNetwork::render3D()
 				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
 			}
 
-
-			
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
@@ -320,10 +313,19 @@ void RestingStateNetwork::render3D()
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
 
+			int i = m_3Dpoints[s].first.z * m_columns * m_rows + m_3Dpoints[s].first.y *m_columns + m_3Dpoints[s].first.x; 
+			texture[i*3] = R;
+			texture[i*3 + 1] = G;
+			texture[i*3 + 2] = B;
 		}
+		//TEXTURE
+		Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
+		pNewAnatomy->setFloatDataset(texture);
+		pNewAnatomy->generateTexture();
 	}
+
 }
-void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<float>& positions)
+void RestingStateNetwork::correlate(std::vector<float>& positions)
 {
 	 //float data[N]; int count = 0;
 	//int N = m_rows * m_columns * m_bands;
@@ -429,7 +431,6 @@ void RestingStateNetwork::correlate(std::vector<float>& texture, std::vector<flo
 						m_zMax = zScore;
 					if(zScore > m_corrThreshold)
 					{
-						texture[i*3] = zScore;//m_colorSliderValue;
 						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
 					}
 				}
