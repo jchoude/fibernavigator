@@ -74,6 +74,13 @@ private:
 	DatasetIndex m_index;
 	float m_corrThreshold;
 	float m_colorSliderValue;
+	int m_datasetSizeL;
+	int m_rowsL;
+	int m_columnsL;
+	int m_framesL;
+	float m_xL;
+	float m_yL;
+	float m_zL;
 
 };
 

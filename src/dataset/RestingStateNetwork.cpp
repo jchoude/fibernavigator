@@ -55,9 +55,10 @@ m_bands( 108 ),
 m_corrThreshold( 3.0f ),
 m_colorSliderValue( 5.0f )
 {
-	m_rows = DatasetManager::getInstance()->getRows();
-	m_columns = DatasetManager::getInstance()->getColumns();
-	m_frames =  DatasetManager::getInstance()->getFrames();
+	m_rowsL = DatasetManager::getInstance()->getRows();
+	m_columnsL = DatasetManager::getInstance()->getColumns();
+	m_framesL =  DatasetManager::getInstance()->getFrames();
+	m_datasetSizeL = m_rowsL * m_columnsL * m_framesL;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -188,14 +189,33 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
 	//Transpose signal for easy acces of timelaps
     for( int s(0); s < size; ++s )
     {
-		for( int b(0); b < m_bands; ++b )
-		{
-			m_volumes[b].push_back(m_signalNormalized[s][b]);
-			m_volumes[b].push_back(m_signalNormalized[s][b]);
-			m_volumes[b].push_back(m_signalNormalized[s][b]);
-		}
+		//for( int b(0); b < m_bands; ++b )
+		//{
+		//	m_volumes[b].push_back(m_signalNormalized[s][b]);
+		//	m_volumes[b].push_back(m_signalNormalized[s][b]);
+		//	m_volumes[b].push_back(m_signalNormalized[s][b]);
+		//}
 		calculateMeanAndSigma(m_signalNormalized[s], m_meansAndSigmas[s]);
     }
+
+	for( int b(0); b < 1; ++b )
+	{
+		m_volumes[b].resize(m_datasetSizeL * 3);
+		for( float x = 0; x < m_columns; x++)
+		{
+			for( float y = 0; y < m_rows; y++)
+			{
+				for( float z = 0; z < m_frames; z++)
+				{
+					int i = z * m_columns * m_rows + y *m_columns + x;
+					float s = std::floor(z * m_voxelSizeZ * m_columns * m_rows + y *m_voxelSizeY *m_columns + x * m_voxelSizeX);
+					m_volumes[b][s*3] = m_signalNormalized[i][b];
+					m_volumes[b][s*3 + 1] = m_signalNormalized[i][b];
+					m_volumes[b][s*3 + 2] = m_signalNormalized[i][b];
+				}
+			}
+		}
+	}
 
 	//Create texture made of 1st timelaps
 	data.assign(size, 0.0f);
