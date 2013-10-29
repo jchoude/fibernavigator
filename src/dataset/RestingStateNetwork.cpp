@@ -181,6 +181,7 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
 				m_signalNormalized[s].push_back ((m_signal[s][b] - dataMin[s]) / (dataMax[s] - dataMin[s]));
 		}
     }
+
 	
 	m_volumes.resize(m_bands);
 	m_meansAndSigmas.resize(size);
@@ -189,6 +190,8 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
     {
 		for( int b(0); b < m_bands; ++b )
 		{
+			m_volumes[b].push_back(m_signalNormalized[s][b]);
+			m_volumes[b].push_back(m_signalNormalized[s][b]);
 			m_volumes[b].push_back(m_signalNormalized[s][b]);
 		}
 		calculateMeanAndSigma(m_signalNormalized[s], m_meansAndSigmas[s]);
