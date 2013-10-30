@@ -203,24 +203,24 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
 		calculateMeanAndSigma(m_signalNormalized[s], m_meansAndSigmas[s]);
     }
 
-	for( int b(0); b < 3; ++b )
-	{
-		m_volumes[b].resize(m_datasetSizeL * 3);
-		for( float x = 0; x < m_columns; x++)
-		{
-			for( float y = 0; y < m_rows; y++)
-			{
-				for( float z = 0; z < m_frames; z++)
-				{
-					int i = z * m_columns * m_rows + y *m_columns + x;
-					float s = z * floor(float(m_framesL/m_frames)) * m_columnsL * m_rowsL + y *floor(float(m_rowsL/m_rows)) *m_columnsL + x * floor(float(m_columnsL/m_columns));
-					m_volumes[b][s*3] = m_signalNormalized[i][b];
-					m_volumes[b][s*3 + 1] = m_signalNormalized[i][b];
-					m_volumes[b][s*3 + 2] = m_signalNormalized[i][b];
-				}
-			}
-		}
-	}
+	//for( int b(0); b < m_bands; ++b )
+	//{
+	//	m_volumes[b].resize(m_datasetSizeL* 3);
+	//	for( float x = 0; x < m_columns; x++)
+	//	{
+	//		for( float y = 0; y < m_rows; y++)
+	//		{
+	//			for( float z = 0; z < m_frames; z++)
+	//			{
+	//				int i = z * m_columns * m_rows + y *m_columns + x;
+	//				float s = z * floor(float(m_framesL/m_frames)) * m_columnsL * m_rowsL + y *floor(float(m_rowsL/m_rows)) *m_columnsL + x * floor(float(m_columnsL/m_columns));
+	//				m_volumes[b][s*3] = m_signalNormalized[i][b];
+	//				m_volumes[b][s*3 + 1] = m_signalNormalized[i][b];
+	//				m_volumes[b][s*3 + 2] = m_signalNormalized[i][b];
+	//			}
+	//		}
+	//	}
+	//}
 
 	//Create texture made of 1st timelaps
 	data.assign(size, 0.0f);
@@ -230,8 +230,25 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
 
 void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 {
+	std::vector<float> vol(m_datasetSizeL* 3, 0.0f);
+
+	for( float x = 0; x < m_columns; x++)
+	{
+		for( float y = 0; y < m_rows; y++)
+		{
+			for( float z = 0; z < m_frames; z++)
+			{
+				int i = z * m_columns * m_rows + y *m_columns + x;
+				float s = z * floor(float(m_framesL/m_frames)) * m_columnsL * m_rowsL + y *floor(float(m_rowsL/m_rows)) *m_columnsL + x * floor(float(m_columnsL/m_columns));
+				vol[s*3] = m_signalNormalized[i][sliderValue];
+				vol[s*3 + 1] = m_signalNormalized[i][sliderValue];
+				vol[s*3 + 2] = m_signalNormalized[i][sliderValue];
+			}
+		}
+	}
+
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-	pNewAnatomy->setFloatDataset(m_volumes[sliderValue]);
+	pNewAnatomy->setFloatDataset(vol);
 	pNewAnatomy->generateTexture();
 }
 
