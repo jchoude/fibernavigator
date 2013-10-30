@@ -213,7 +213,7 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
 				for( float z = 0; z < m_frames; z++)
 				{
 					int i = z * m_columns * m_rows + y *m_columns + x;
-					float s = std::floor(z * m_voxelSizeZ/m_zL * m_columnsL * m_rowsL + y *m_voxelSizeY/m_yL *m_columnsL + x * m_voxelSizeX/m_xL);
+					float s = z * floor(float(m_framesL/m_frames)) * m_columnsL * m_rowsL + y *floor(float(m_rowsL/m_rows)) *m_columnsL + x * floor(float(m_columnsL/m_columns));
 					m_volumes[b][s*3] = m_signalNormalized[i][b];
 					m_volumes[b][s*3 + 1] = m_signalNormalized[i][b];
 					m_volumes[b][s*3 + 2] = m_signalNormalized[i][b];
