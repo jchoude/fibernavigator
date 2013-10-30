@@ -58,6 +58,11 @@ m_colorSliderValue( 5.0f )
 	m_rowsL = DatasetManager::getInstance()->getRows();
 	m_columnsL = DatasetManager::getInstance()->getColumns();
 	m_framesL =  DatasetManager::getInstance()->getFrames();
+
+	m_xL = DatasetManager::getInstance()->getVoxelX();
+	m_yL = DatasetManager::getInstance()->getVoxelY();
+	m_zL =  DatasetManager::getInstance()->getVoxelZ();
+
 	m_datasetSizeL = m_rowsL * m_columnsL * m_framesL;
 }
 
@@ -198,7 +203,7 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
 		calculateMeanAndSigma(m_signalNormalized[s], m_meansAndSigmas[s]);
     }
 
-	for( int b(0); b < 1; ++b )
+	for( int b(0); b < 3; ++b )
 	{
 		m_volumes[b].resize(m_datasetSizeL * 3);
 		for( float x = 0; x < m_columns; x++)
@@ -208,7 +213,7 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
 				for( float z = 0; z < m_frames; z++)
 				{
 					int i = z * m_columns * m_rows + y *m_columns + x;
-					float s = std::floor(z * m_voxelSizeZ * m_columns * m_rows + y *m_voxelSizeY *m_columns + x * m_voxelSizeX);
+					float s = std::floor(z * m_voxelSizeZ/m_zL * m_columnsL * m_rowsL + y *m_voxelSizeY/m_yL *m_columnsL + x * m_voxelSizeX/m_xL);
 					m_volumes[b][s*3] = m_signalNormalized[i][b];
 					m_volumes[b][s*3 + 1] = m_signalNormalized[i][b];
 					m_volumes[b][s*3 + 2] = m_signalNormalized[i][b];
