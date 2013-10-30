@@ -44,6 +44,7 @@ private:
     bool createStructure  ( std::vector< short int > &i_fileFloatData );
 	void correlate(std::vector< float >& position);
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
+	std::vector<int> get3DIndexes(int x, int y, int z);
 	
 
     std::vector<std::vector<short int> >   m_signal; //2D containing the data

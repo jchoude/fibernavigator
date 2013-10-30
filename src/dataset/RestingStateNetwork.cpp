@@ -228,10 +228,28 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
     return true;
 }
 
+vector<int> RestingStateNetwork::get3DIndexes(int x, int y, int z)
+{
+	std::vector<int> indexes;
+
+	for( int padx = 0; padx < 4; padx++)
+	{
+		for( int pady = 0; pady < 4; pady++)
+		{
+			for( int padz = 0; padz < 4; padz++)
+			{
+				indexes.push_back( (z * floor(float(m_framesL/m_frames)) + padz) * m_columnsL * m_rowsL + (y *floor(float(m_rowsL/m_rows)) + pady) *m_columnsL + (x * floor(float(m_columnsL/m_columns)) + padx) );
+			}
+		}
+	}
+
+	return indexes;
+}
+
 void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 {
 	std::vector<float> vol(m_datasetSizeL* 3, 0.0f);
-
+	std::vector<int> indexes;
 	for( float x = 0; x < m_columns; x++)
 	{
 		for( float y = 0; y < m_rows; y++)
@@ -239,10 +257,24 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 			for( float z = 0; z < m_frames; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				float s = z * floor(float(m_framesL/m_frames)) * m_columnsL * m_rowsL + y *floor(float(m_rowsL/m_rows)) *m_columnsL + x * floor(float(m_columnsL/m_columns));
+				int s = z * floor(float(m_framesL/m_frames)) * m_columnsL * m_rowsL + y *floor(float(m_rowsL/m_rows)) *m_columnsL + x * floor(float(m_columnsL/m_columns)); // O
+				
 				vol[s*3] = m_signalNormalized[i][sliderValue];
 				vol[s*3 + 1] = m_signalNormalized[i][sliderValue];
 				vol[s*3 + 2] = m_signalNormalized[i][sliderValue];
+
+				//Patch arround for 1x1x1
+				if(m_framesL != m_frames)
+				{
+					indexes = get3DIndexes(x,y,z);
+					for(unsigned int s = 0; s < indexes.size(); s++)
+					{
+						int id = indexes[s];
+						vol[id*3] = m_signalNormalized[i][sliderValue];
+						vol[id*3 + 1] = m_signalNormalized[i][sliderValue];
+						vol[id*3 + 2] = m_signalNormalized[i][sliderValue];
+					}
+				}
 			}
 		}
 	}
