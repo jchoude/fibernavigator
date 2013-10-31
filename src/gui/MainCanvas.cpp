@@ -805,7 +805,7 @@ void MainCanvas::render()
                 }
 				else if(RTFMRIHelper::getInstance()->isRTFMRIActive())
 				{
-					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D();
+					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(false);
 				}
 
                 //save context for picking

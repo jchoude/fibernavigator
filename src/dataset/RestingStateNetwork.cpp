@@ -323,7 +323,12 @@ void RestingStateNetwork::seedBased()
 			{
 				for( float z = minCorner.z; z <= maxCorner.z; z++)
 				{
-					positions.push_back( z * columns * rows + y *columns + x );
+					//Switch to 3x3x3
+					positions.push_back(  floor(float(z *m_frames/m_framesL))* m_columns * m_rows + floor(float(y *m_rows/m_rowsL))*m_columns + floor(float(x * m_columns/m_columnsL)));
+	/*				glColor3f(1.0f,0.0f,0.0f);
+						glBegin(GL_POINTS);
+						glVertex3f(x * xVoxel,y * yVoxel,z * zVoxel);
+						glEnd();*/
 				}
 			}
 		}
@@ -335,17 +340,23 @@ void RestingStateNetwork::seedBased()
     for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
     {
 		m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
+
+		//Reset to 1x1x1
+		m_3Dpoints[s].first.x *= floor(float(m_columnsL/m_columns));
+		m_3Dpoints[s].first.y *= floor(float(m_rowsL/m_rows));
+		m_3Dpoints[s].first.z *= floor(float(m_framesL/m_frames));
     }
 
-	render3D();
+	render3D(true);
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
 }
 
-void RestingStateNetwork::render3D()
+void RestingStateNetwork::render3D(bool recalculateTexture)
 {
 	if( m_3Dpoints.size() > 0 )
     {
-		std::vector<float> texture(m_datasetSize*3, 0.0f);
+		float renderTex = false;
+		std::vector<float> texture(m_datasetSizeL*3, 0.0f);
 		//Apply ColorMap
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
@@ -383,22 +394,30 @@ void RestingStateNetwork::render3D()
 
 			
 			glBegin(GL_POINTS);
-				glVertex3f(m_3Dpoints[s].first.x * m_voxelSizeX, m_3Dpoints[s].first.y * m_voxelSizeY, m_3Dpoints[s].first.z * m_voxelSizeZ);
+				glVertex3f(m_3Dpoints[s].first.x * m_xL, m_3Dpoints[s].first.y * m_yL, m_3Dpoints[s].first.z * m_zL);
 			glEnd();
 
 			//glDisable( GL_TEXTURE_2D );
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
 
-			int i = m_3Dpoints[s].first.z * m_columns * m_rows + m_3Dpoints[s].first.y *m_columns + m_3Dpoints[s].first.x; 
-			texture[i*3] = R;
-			texture[i*3 + 1] = G;
-			texture[i*3 + 2] = B;
+			//int i = m_3Dpoints[s].first.z * m_columns * m_rows + m_3Dpoints[s].first.y *m_columns + m_3Dpoints[s].first.x; 
+			if(recalculateTexture)
+			{
+				int i = m_3Dpoints[s].first.z * m_columnsL * m_rowsL + m_3Dpoints[s].first.y  *m_columnsL + m_3Dpoints[s].first.x ; // O
+				texture[i*3] = R;
+				texture[i*3 + 1] = G;
+				texture[i*3 + 2] = B;
+				renderTex = true;
+			}
 		}
 		//TEXTURE
-		Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-		pNewAnatomy->setFloatDataset(texture);
-		pNewAnatomy->generateTexture();
+		if(renderTex)
+		{
+			Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
+			pNewAnatomy->setFloatDataset(texture);
+			pNewAnatomy->generateTexture();
+		}
 	}
 
 }
@@ -420,6 +439,8 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
  //    
 	//std::cout <<"after " << cuData[1];
 
+	
+	
 	//Mean signal inside box
 	std::vector<float> meanSignal;
 	for(int i=0; i < m_bands; i++)

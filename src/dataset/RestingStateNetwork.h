@@ -26,7 +26,7 @@ public:
 	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
 	void SetSizePSliderValue (float value ) { m_pointSize = value; }
 	void SetAlphaSliderValue (float value ) { m_alpha = value; }
-	void render3D();
+	void render3D(bool recalculateTexture);
 	void seedBased();
 	size_t getSize()                               { return m_3Dpoints.size(); }
 	void clear3DPoints()                           { m_3Dpoints.clear(); }
