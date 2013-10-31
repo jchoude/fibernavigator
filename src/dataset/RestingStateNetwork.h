@@ -46,12 +46,11 @@ private:
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
 	std::vector<int> get3DIndexes(int x, int y, int z);
 	
-
     std::vector<std::vector<short int> >   m_signal; //2D containing the data
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
-	std::vector<std::pair< float, float > > m_meansAndSigmas;
-	std::vector<std::pair<Vector,float> > m_3Dpoints;
+	std::vector<std::pair< float, float > > m_meansAndSigmas; 
+	std::vector<std::pair<Vector,float> > m_3Dpoints; //3D points 
 	
 	float m_zMin;
 	float m_zMax;
@@ -75,13 +74,13 @@ private:
 	DatasetIndex m_index;
 	float m_corrThreshold;
 	float m_colorSliderValue;
-	int m_datasetSizeL;
 	int m_rowsL;
 	int m_columnsL;
 	int m_framesL;
 	float m_xL;
 	float m_yL;
 	float m_zL;
+	int m_datasetSizeL;
 
 };
 

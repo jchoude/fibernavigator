@@ -43,7 +43,9 @@
 //		buf[i] = buf[i]+0.2f;
 //}
 
-///////////////////////////////////////////
+//////////////////////////////////////////
+//Constructor
+//////////////////////////////////////////
 RestingStateNetwork::RestingStateNetwork():
 m_zMin( 999.0f ),
 m_zMax( 0.0f ),
@@ -66,14 +68,18 @@ m_colorSliderValue( 5.0f )
 	m_datasetSizeL = m_rowsL * m_columnsL * m_framesL;
 }
 
-//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////
+//Destructor
+//////////////////////////////////////////
 RestingStateNetwork::~RestingStateNetwork()
 {
     Logger::getInstance()->print( wxT( "RestingStateNetwork destructor called but nothing to do." ), LOGLEVEL_DEBUG );
 	//cudaFree(d_data);
 }
 
-//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////
+//Load
+//////////////////////////////////////////
 bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 {
     m_datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
@@ -92,7 +98,6 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	if(pHeader->datatype == 4)
 	{
 		short int* pData = (short int*)pBody->data;
-		
 		//Prepare the data into a 1D vector, side by side
 		for( int i( 0 ); i < m_datasetSize; ++i )
 		{
@@ -124,7 +129,6 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 	//Assign structure to a 2D vector of timelaps
     createStructure( fileFloatData );
 
-
 	//Load fMRI sprite texture.
 	Image<ColorRGB> TmpImage;
 	wxString name = wxT ("fMRI.bmp");
@@ -142,8 +146,10 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFloatData )
+//////////////////////////////////////////
+//Create structure
+//////////////////////////////////////////
+bool RestingStateNetwork::createStructure( std::vector< short int > &i_fileFloatData )
 {
 	int size = m_rows * m_columns * m_frames;
     m_signal.resize( size );
@@ -194,33 +200,8 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
 	//Transpose signal for easy acces of timelaps
     for( int s(0); s < size; ++s )
     {
-		//for( int b(0); b < m_bands; ++b )
-		//{
-		//	m_volumes[b].push_back(m_signalNormalized[s][b]);
-		//	m_volumes[b].push_back(m_signalNormalized[s][b]);
-		//	m_volumes[b].push_back(m_signalNormalized[s][b]);
-		//}
 		calculateMeanAndSigma(m_signalNormalized[s], m_meansAndSigmas[s]);
     }
-
-	//for( int b(0); b < m_bands; ++b )
-	//{
-	//	m_volumes[b].resize(m_datasetSizeL* 3);
-	//	for( float x = 0; x < m_columns; x++)
-	//	{
-	//		for( float y = 0; y < m_rows; y++)
-	//		{
-	//			for( float z = 0; z < m_frames; z++)
-	//			{
-	//				int i = z * m_columns * m_rows + y *m_columns + x;
-	//				float s = z * floor(float(m_framesL/m_frames)) * m_columnsL * m_rowsL + y *floor(float(m_rowsL/m_rows)) *m_columnsL + x * floor(float(m_columnsL/m_columns));
-	//				m_volumes[b][s*3] = m_signalNormalized[i][b];
-	//				m_volumes[b][s*3 + 1] = m_signalNormalized[i][b];
-	//				m_volumes[b][s*3 + 2] = m_signalNormalized[i][b];
-	//			}
-	//		}
-	//	}
-	//}
 
 	//Create texture made of 1st timelaps
 	data.assign(size, 0.0f);
@@ -228,6 +209,9 @@ bool RestingStateNetwork::createStructure  ( std::vector< short int > &i_fileFlo
     return true;
 }
 
+//////////////////////////////////////////////////////////////////////////
+//Get 3D indexes to fill the 1x1x1 texture from a 3x3x3 x,y,z point 
+//////////////////////////////////////////////////////////////////////////
 vector<int> RestingStateNetwork::get3DIndexes(int x, int y, int z)
 {
 	std::vector<int> indexes;
@@ -238,7 +222,8 @@ vector<int> RestingStateNetwork::get3DIndexes(int x, int y, int z)
 		{
 			for( int padz = 0; padz < 4; padz++)
 			{
-				indexes.push_back( (z * floor(float(m_framesL/m_frames)) + padz) * m_columnsL * m_rowsL + (y *floor(float(m_rowsL/m_rows)) + pady) *m_columnsL + (x * floor(float(m_columnsL/m_columns)) + padx) );
+				int i = (z * floor(float(m_framesL/m_frames)) + padz) * m_columnsL * m_rowsL + (y *floor(float(m_rowsL/m_rows)) + pady) *m_columnsL + (x * floor(float(m_columnsL/m_columns)) + padx);
+				indexes.push_back( i );
 			}
 		}
 	}
@@ -246,6 +231,9 @@ vector<int> RestingStateNetwork::get3DIndexes(int x, int y, int z)
 	return indexes;
 }
 
+//////////////////////////////////////////
+//Set raw data texture from sliderValue
+//////////////////////////////////////////
 void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 {
 	std::vector<float> vol(m_datasetSizeL* 3, 0.0f);
@@ -284,6 +272,9 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 	pNewAnatomy->generateTexture();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//Set texture from Network fmri: NOTE: doesnt work functionally yet, data should be set
+//////////////////////////////////////////////////////////////////////////////////////////
 void RestingStateNetwork::SetTextureFromNetwork()
 {
 	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
@@ -291,18 +282,15 @@ void RestingStateNetwork::SetTextureFromNetwork()
 	pNewAnatomy->generateTexture();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//Initiate the seed-based algorithm
+//////////////////////////////////////////////////////////////////////////////////////////
 void RestingStateNetwork::seedBased()
 {
 	m_3Dpoints.clear();
 	m_zMin = 999.0f;
 	m_zMax = 0.0f;
 	 
-    float xVoxel = DatasetManager::getInstance()->getVoxelX();
-    float yVoxel = DatasetManager::getInstance()->getVoxelY();
-    float zVoxel = DatasetManager::getInstance()->getVoxelZ();
-
-	int columns = DatasetManager::getInstance()->getColumns();
-    int rows    = DatasetManager::getInstance()->getRows();
 	std::vector<float> positions; 
 
     Vector minCorner, maxCorner, middle;
@@ -310,12 +298,12 @@ void RestingStateNetwork::seedBased()
 
 	for( unsigned int b = 0; b < selObjs.size(); b++ )
 	{
-		minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * xVoxel /  2.0f ) / xVoxel );
-		minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * yVoxel /  2.0f ) / yVoxel );
-		minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * zVoxel /  2.0f ) / zVoxel );
-		maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * xVoxel /  2.0f ) / xVoxel );
-		maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * yVoxel /  2.0f ) / yVoxel );
-		maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * zVoxel /  2.0f ) / zVoxel );
+		minCorner.x = (int)(floor(selObjs[b]->getCenter().x - selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
+		minCorner.y = (int)(floor(selObjs[b]->getCenter().y - selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
+		minCorner.z = (int)(floor(selObjs[b]->getCenter().z - selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
+		maxCorner.x = (int)(floor(selObjs[b]->getCenter().x + selObjs[b]->getSize().x * m_xL /  2.0f ) / m_xL );
+		maxCorner.y = (int)(floor(selObjs[b]->getCenter().y + selObjs[b]->getSize().y * m_yL /  2.0f ) / m_yL );
+		maxCorner.z = (int)(floor(selObjs[b]->getCenter().z + selObjs[b]->getSize().z * m_zL /  2.0f ) / m_zL );
 		
 		for( float x = minCorner.x; x <= maxCorner.x; x++)
 		{
@@ -324,15 +312,11 @@ void RestingStateNetwork::seedBased()
 				for( float z = minCorner.z; z <= maxCorner.z; z++)
 				{
 					//Switch to 3x3x3
-					positions.push_back(  floor(float(z *m_frames/m_framesL))* m_columns * m_rows + floor(float(y *m_rows/m_rowsL))*m_columns + floor(float(x * m_columns/m_columnsL)));
-	/*				glColor3f(1.0f,0.0f,0.0f);
-						glBegin(GL_POINTS);
-						glVertex3f(x * xVoxel,y * yVoxel,z * zVoxel);
-						glEnd();*/
+					int i = floor(float(z *m_frames/m_framesL))* m_columns * m_rows + floor(float(y *m_rows/m_rowsL))*m_columns + floor(float(x * m_columns/m_columnsL));
+					positions.push_back( i );
 				}
 			}
 		}
-		
 		correlate(positions);
 	}
 	
@@ -351,12 +335,15 @@ void RestingStateNetwork::seedBased()
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//Rendering function, for both 3D sprites and textures options.
+//////////////////////////////////////////////////////////////////////////////////////////
 void RestingStateNetwork::render3D(bool recalculateTexture)
 {
 	if( m_3Dpoints.size() > 0 )
     {
-		float renderTex = false;
 		std::vector<float> texture(m_datasetSizeL*3, 0.0f);
+		
 		//Apply ColorMap
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
@@ -392,7 +379,6 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
 			//glBindTexture(GL_TEXTURE_2D, m_lookupTex);
 
-			
 			glBegin(GL_POINTS);
 				glVertex3f(m_3Dpoints[s].first.x * m_xL, m_3Dpoints[s].first.y * m_yL, m_3Dpoints[s].first.z * m_zL);
 			glEnd();
@@ -401,18 +387,31 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
 
-			//int i = m_3Dpoints[s].first.z * m_columns * m_rows + m_3Dpoints[s].first.y *m_columns + m_3Dpoints[s].first.x; 
+			//check for Unnecesssary computation when static scene
 			if(recalculateTexture)
 			{
+				std::vector<int> indexes;
 				int i = m_3Dpoints[s].first.z * m_columnsL * m_rowsL + m_3Dpoints[s].first.y  *m_columnsL + m_3Dpoints[s].first.x ; // O
 				texture[i*3] = R;
 				texture[i*3 + 1] = G;
 				texture[i*3 + 2] = B;
-				renderTex = true;
+
+				//Patch arround for 1x1x1
+				if(m_framesL != m_frames)
+				{
+					indexes = get3DIndexes(floor(float(m_3Dpoints[s].first.x * m_columns/m_columnsL)),floor(float(m_3Dpoints[s].first.y * m_rows/m_rowsL)),floor(float(m_3Dpoints[s].first.z * m_frames/m_framesL)));
+					for(unsigned int u = 0; u < indexes.size(); u++)
+					{
+						int id = indexes[u];
+						texture[id*3] = R;
+						texture[id*3 + 1] = G;
+						texture[id*3 + 2] = B;
+					}
+				}
 			}
 		}
 		//TEXTURE
-		if(renderTex)
+		if(recalculateTexture)
 		{
 			Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
 			pNewAnatomy->setFloatDataset(texture);
@@ -421,6 +420,10 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 	}
 
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//Correlation function given a position, with all other time series
+//////////////////////////////////////////////////////////////////////////////////////////
 void RestingStateNetwork::correlate(std::vector<float>& positions)
 {
 	 //float data[N]; int count = 0;
@@ -439,7 +442,6 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
  //    
 	//std::cout <<"after " << cuData[1];
 
-	
 	
 	//Mean signal inside box
 	std::vector<float> meanSignal;
@@ -511,7 +513,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 		}
 	}
 
-	//Calculate z-scores, and write into texture.
+	//Calculate z-scores, and save them.
 	sigma /= nb;
 	for( float x = 0; x < m_columns; x++)
 	{
@@ -537,6 +539,9 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//Calculate Mean and Sigma for the signal inside the box
+//////////////////////////////////////////////////////////////////////////////////////////
 void RestingStateNetwork::calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params)
 {
 	float mean = 0.0f;
