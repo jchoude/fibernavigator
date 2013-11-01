@@ -693,6 +693,7 @@ DatasetIndex DatasetManager::addFibers( Fibers* fibers )
     return index;
 }
 
+
 //////////////////////////////////////////////////////////////////////////
 
 // Loads a mesh. Extension supported: .mesh, .surf and .dip

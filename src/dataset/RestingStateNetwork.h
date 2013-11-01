@@ -26,12 +26,13 @@ public:
 	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
 	void SetSizePSliderValue (float value ) { m_pointSize = value; }
 	void SetAlphaSliderValue (float value ) { m_alpha = value; }
+	void SetNormalize (bool value) { m_normalize = value; }
 	void render3D(bool recalculateTexture);
 	void seedBased();
 	size_t getSize()                               { return m_3Dpoints.size(); }
 	void clear3DPoints()                           { m_3Dpoints.clear(); }
 
-	std::vector<std::vector<short int> >* getSignal() { return &m_signal; }
+	std::vector<std::pair<Vector,float> >* getZscores() { return &m_3Dpoints; }
 	DatasetIndex getIndex()   { return m_index; }
 	DatasetIndex getColumns() { return m_columns; }
 	DatasetIndex getRows()    { return m_rows; }
@@ -50,7 +51,7 @@ private:
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
 	std::vector<std::pair< float, float > > m_meansAndSigmas; 
-	std::vector<std::pair<Vector,float> > m_3Dpoints; //3D points 
+	std::vector<std::pair<Vector,float> > m_3Dpoints; //3D points and their positions
 	
 	float m_zMin;
 	float m_zMax;
@@ -81,6 +82,7 @@ private:
 	float m_yL;
 	float m_zL;
 	int m_datasetSizeL;
+	bool m_normalize; 
 
 };
 

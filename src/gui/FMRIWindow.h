@@ -43,6 +43,7 @@ public:
 	void OnSliderColorMoved					   ( wxCommandEvent& event );
 	void OnSliderSizePMoved					   ( wxCommandEvent& event );
 	void OnSliderAlphaMoved					   ( wxCommandEvent& event );
+	void onConvertRestingState				   ( wxCommandEvent& event );
 	
 	
 	
@@ -69,6 +70,7 @@ private:
 	wxSlider            *m_pSliderAlpha;
 	wxTextCtrl          *m_pTxtAlphaBox;
     wxStaticText        *m_pTextAlpha;
+	wxButton			*m_pBtnConvertFMRI;
 
 	bool showRawData;
     

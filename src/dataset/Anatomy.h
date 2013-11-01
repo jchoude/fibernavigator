@@ -54,6 +54,7 @@ public:
     Anatomy( const wxString &filename );
     Anatomy( const Anatomy * const pAnatomy );
     Anatomy( std::vector<float> *pDataset, const int sample );
+	Anatomy( std::vector<std::pair<Vector,float> >* pDataset);
     Anatomy( const int type );
 	Anatomy( const wxString &filename, const int type );
     virtual ~Anatomy();

@@ -130,6 +130,42 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
     std::copy( pDataset->begin(), pDataset->end(), m_floatDataset.begin() );
 }
 
+Anatomy::Anatomy( std::vector<std::pair<Vector,float> >* pDataset ) 
+: DatasetInfo(),
+  m_isSegmentOn( false ),
+  m_pRoi( NULL ),
+  m_dataType( 2 ),
+  m_pTensorField( NULL ),
+  m_useEqualizedDataset( false ),
+  m_lowerEqThreshold( LOWER_EQ_THRES ),
+  m_upperEqThreshold( UPPER_EQ_THRES ),
+  m_currentLowerEqThreshold( -1 ),
+  m_currentUpperEqThreshold( -1 ),
+  m_originalAxialOrientation( ORIENTATION_UNDEFINED )
+{
+    m_columns = DatasetManager::getInstance()->getColumns();
+    m_rows    = DatasetManager::getInstance()->getRows();
+    m_frames  = DatasetManager::getInstance()->getFrames();
+    m_bands   = 1;
+
+	m_voxelSizeX = DatasetManager::getInstance()->getVoxelX();
+	m_voxelSizeY = DatasetManager::getInstance()->getVoxelY();
+	m_voxelSizeZ = DatasetManager::getInstance()->getVoxelZ();
+
+    m_type    = OVERLAY;
+
+    m_isLoaded = true;
+	int size = m_columns * m_frames * m_rows;
+	m_floatDataset.resize( size );
+
+	for(unsigned int i =0; i < pDataset->size(); i++)
+	{
+		int j = pDataset->at(i).first.z * m_columns * m_rows + pDataset->at(i).first.y *m_columns + pDataset->at(i).first.x;
+		m_floatDataset[j] = pDataset->at(i).second;
+	} 
+    //std::copy( pDataset->begin(), pDataset->end(), m_floatDataset.begin() );
+}
+
 Anatomy::Anatomy( const int type )
 : DatasetInfo(),
   m_isSegmentOn( false ),

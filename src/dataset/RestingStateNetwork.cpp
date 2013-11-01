@@ -55,7 +55,8 @@ m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
 m_corrThreshold( 3.0f ),
-m_colorSliderValue( 5.0f )
+m_colorSliderValue( 5.0f ),
+m_normalize( true )
 {
 	m_rowsL = DatasetManager::getInstance()->getRows();
 	m_columnsL = DatasetManager::getInstance()->getColumns();
@@ -323,7 +324,8 @@ void RestingStateNetwork::seedBased()
 	//normalize min/max
     for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
     {
-		m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
+		if(m_normalize)
+			m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
 
 		//Reset to 1x1x1
 		m_3Dpoints[s].first.x *= floor(float(m_columnsL/m_columns));

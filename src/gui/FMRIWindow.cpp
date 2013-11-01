@@ -120,6 +120,14 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
     pBoxRow8->Add( m_pSliderAlpha,   0, wxALIGN_LEFT | wxEXPAND | wxALL, 1);
 	pBoxRow8->Add( m_pTxtAlphaBox,   0, wxALIGN_LEFT | wxALL, 1);
 	m_pFMRISizer->Add( pBoxRow8, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
+	m_pBtnConvertFMRI = new wxButton( this, wxID_ANY,wxT("Convert to Overlay"), wxDefaultPosition, wxSize(230, -1) );
+	Connect( m_pBtnConvertFMRI->GetId(), wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(FMRIWindow::onConvertRestingState) );
+
+	wxBoxSizer *pBoxRow9 = new wxBoxSizer( wxHORIZONTAL );
+	pBoxRow9->Add( m_pBtnConvertFMRI,   0, wxALIGN_LEFT | wxALL, 1);
+	m_pFMRISizer->Add( pBoxRow9, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
+
 }
 
 void FMRIWindow::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -211,6 +219,33 @@ void FMRIWindow::OnSliderAlphaMoved(  wxCommandEvent& WXUNUSED(event) )
 	m_pTxtAlphaBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
 	DatasetManager::getInstance()->m_pRestingStateNetwork->SetAlphaSliderValue( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
+}
+
+void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
+{
+	//Convert to anat
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetNormalize( false );
+	DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
+	DatasetManager::getInstance()->m_pRestingStateNetwork->SetNormalize( true );
+
+	std::vector<std::pair<Vector,float> >* data = DatasetManager::getInstance()->m_pRestingStateNetwork->getZscores();
+	int indx = DatasetManager::getInstance()->createAnatomy( data );
+    
+	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
+    pNewAnatomy->setShowFS(false);
+
+    pNewAnatomy->setType(OVERLAY);
+    pNewAnatomy->setDataType(16);
+    pNewAnatomy->setName( wxT("Z-score map") );
+    MyApp::frame->m_pListCtrl->InsertItem( indx );
+
+	RTFMRIHelper::getInstance()->setRTFMRIReady(false);
+
+	DatasetManager::getInstance()->m_pRestingStateNetwork->clear3DPoints();
+	RTFMRIHelper::getInstance()->setRTFMRIDirty( false );
+    m_pBtnStart->SetLabel(wxT("Start correlation"));
+    m_pBtnStart->SetValue(false);
+
 }
 
 void FMRIWindow::OnStartRTFMRI( wxCommandEvent& WXUNUSED(event) )
