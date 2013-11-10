@@ -324,8 +324,8 @@ void RestingStateNetwork::seedBased()
 	//normalize min/max
     for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
     {
-		if(m_normalize)
-			m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
+		//if(m_normalize)
+			//m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
 
 		//Reset to 1x1x1
 		m_3Dpoints[s].first.x *= floor(float(m_columnsL/m_columns));
@@ -368,24 +368,26 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 				G = 1.0f;
 				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
 			}*/
-			if(m_3Dpoints[s].second < 0.50f)
+			float mid = (m_zMin + m_zMax) / 2.0f;
+			float v = (m_3Dpoints[s].second - m_zMin) / (m_zMax - m_zMin);
+			if(m_3Dpoints[s].second < mid)
 			{
-				R = m_3Dpoints[s].second / 0.50f;
+				R = (m_3Dpoints[s].second - m_zMin) / (mid - m_zMin);
 				G = 1.0f;
 				B = 0.0f;
 			}
 			else
 			{
 				R = 1.0f;
-				G = 1 - ((m_3Dpoints[s].second - 0.50f) / 0.50f);
+				G = 1 - (v);
 				B = 0.0f;
 			}
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
-			glPointSize(m_3Dpoints[s].second * m_pointSize + 1.0f);
-			glColor4f(R,G,B,(m_3Dpoints[s].second*m_alpha) / 2.0f);
+			glPointSize(m_3Dpoints[s].second / m_zMax * m_pointSize + 1.0f);
+			glColor4f(R,G,B,m_3Dpoints[s].second / m_zMax *m_alpha);
 
 			//glActiveTexture(GL_TEXTURE0);
 			//glEnable( GL_TEXTURE_2D );
@@ -539,14 +541,22 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 				if(corrFactors[i] != 0)
 				{
 					float zScore = (corrFactors[i] - meanCorr) / sigma;
-					if(zScore < m_zMin)
+					if(zScore < m_zMin && zScore > 0.0f)
 						m_zMin = zScore;
 					if(zScore > m_zMax)
 						m_zMax = zScore;
-					//if(zScore > m_corrThreshold)
-					//{
+					if(zScore > m_corrThreshold && m_corrThreshold > 0.0f)
+					{
 						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
-					//}
+					}
+					else if(m_corrThreshold == 0.0f)
+					{
+						if(zScore > 0.0f)
+							m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
+						else
+							m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),0.0f));
+
+					}
 				}
 			}
 		}

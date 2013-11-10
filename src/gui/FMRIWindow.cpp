@@ -74,8 +74,8 @@ FMRIWindow::FMRIWindow( wxWindow *pParent, MainFrame *pMf, wxWindowID id, const 
 	m_pFMRISizer->Add( pBoxRow3, 0, wxFIXED_MINSIZE | wxEXPAND, 0 );
 
 	m_pTextCorrThreshold = new wxStaticText( this, wxID_ANY, wxT("Z-Threshold"), wxDefaultPosition, wxSize(70, -1), wxALIGN_CENTER );
-	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 1, 150, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderCorrThreshold->SetValue( 30 );
+	m_pSliderCorrThreshold = new MySlider( this, wxID_ANY, 0, 0, 500, wxDefaultPosition, wxSize(100, -1), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderCorrThreshold->SetValue( 300 );
 	Connect( m_pSliderCorrThreshold->GetId(), wxEVT_COMMAND_SLIDER_UPDATED, wxCommandEventHandler(FMRIWindow::OnSliderCorrThreshMoved) );
     m_pTxtCorrThreshBox = new wxTextCtrl( this, wxID_ANY, wxT("3.0"), wxDefaultPosition, wxSize(55, -1), wxTE_CENTRE | wxTE_READONLY );
 
@@ -190,7 +190,7 @@ void FMRIWindow::OnSliderRestMoved( wxCommandEvent& WXUNUSED(event) )
 
 void FMRIWindow::OnSliderCorrThreshMoved(  wxCommandEvent& WXUNUSED(event) )
 {
-	float sliderValue = m_pSliderCorrThreshold->GetValue() / 10.0f;
+	float sliderValue = m_pSliderCorrThreshold->GetValue() / 100.0f;
     m_pTxtCorrThreshBox->SetValue( wxString::Format( wxT( "%.2f"), sliderValue ) );
 	DatasetManager::getInstance()->m_pRestingStateNetwork->SetCorrThreshold( sliderValue );
 	RTFMRIHelper::getInstance()->setRTFMRIDirty( true );
