@@ -350,7 +350,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
 			float R,G,B;
-			if(m_3Dpoints[s].second < 0.25f)
+			/*if(m_3Dpoints[s].second < 0.25f)
 			{
 				R = m_3Dpoints[s].second / 0.25f;
 				G = 0.0f;
@@ -367,6 +367,18 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 				R = 1.0f;
 				G = 1.0f;
 				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
+			}*/
+			if(m_3Dpoints[s].second < 0.50f)
+			{
+				R = m_3Dpoints[s].second / 0.50f;
+				G = 1.0f;
+				B = 0.0f;
+			}
+			else
+			{
+				R = 1.0f;
+				G = 1 - ((m_3Dpoints[s].second - 0.50f) / 0.50f);
+				B = 0.0f;
 			}
 
 			glEnable(GL_BLEND);
@@ -531,10 +543,10 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 						m_zMin = zScore;
 					if(zScore > m_zMax)
 						m_zMax = zScore;
-					if(zScore > m_corrThreshold)
-					{
+					//if(zScore > m_corrThreshold)
+					//{
 						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
-					}
+					//}
 				}
 			}
 		}
