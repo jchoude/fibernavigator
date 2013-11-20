@@ -523,7 +523,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 				int i = z * m_columns * m_rows + y *m_columns + x;
 				if(corrFactors[i] != 0)
 				{
-					sigma += sqrt((corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr));	
+					sigma += (corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr);	
 				}		
 			}
 		}
@@ -531,6 +531,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 
 	//Calculate z-scores, and save them.
 	sigma /= nb;
+	sigma = sqrt(sigma);
 	for( float x = 0; x < m_columns; x++)
 	{
 		for( float y = 0; y < m_rows; y++)
