@@ -499,11 +499,16 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 						num += (meanSignal[j] - RefMeanAndSigma.first) * ( m_signalNormalized[i][j] - m_meansAndSigmas[i].first);
 					}
 					float value = num / ( RefMeanAndSigma.second * m_meansAndSigmas[i].second);
-					value /= (m_bands - 1);
+					value /= (m_bands);
 				
-					corrSum+=value;
-					corrFactors[i] = value;
-					nb++;
+					if(value > 0)
+					{
+						corrSum+=value;
+						corrFactors[i] = value;
+						nb++;
+					}
+					else
+						corrFactors[i] = -1;
 				}
 				else
 					corrFactors[i] = 0.0f;
@@ -521,7 +526,7 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 0; z < m_frames; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				if(corrFactors[i] != 0)
+				if(corrFactors[i] > 0.0f)
 				{
 					sigma += (corrFactors[i] - meanCorr)*(corrFactors[i] - meanCorr);	
 				}		
@@ -539,25 +544,24 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 			for( float z = 0; z < m_frames; z++)
 			{
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				if(corrFactors[i] != 0)
+				
+				if(m_corrThreshold == 0.0f && corrFactors[i] != 0)
+					{	
+						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),0.0f));
+					}
+
+				if(corrFactors[i] > 0)
 				{
 					float zScore = (corrFactors[i] - meanCorr) / sigma;
 					if(zScore < m_zMin && zScore > 0.0f)
 						m_zMin = zScore;
 					if(zScore > m_zMax)
 						m_zMax = zScore;
-					if(zScore > m_corrThreshold && m_corrThreshold > 0.0f)
+					if(zScore > m_corrThreshold)
 					{
 						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
 					}
-					else if(m_corrThreshold == 0.0f)
-					{
-						if(zScore > 0.0f)
-							m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
-						else
-							m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),0.0f));
-
-					}
+				
 				}
 			}
 		}
