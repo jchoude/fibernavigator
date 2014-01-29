@@ -50,7 +50,7 @@ RestingStateNetwork::RestingStateNetwork():
 m_zMin( 999.0f ),
 m_zMax( 0.0f ),
 m_alpha( 0.5f),
-m_pointSize( 10.0f ),
+m_pointSize( 5.0f ),
 m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
@@ -369,10 +369,19 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
 			}*/
 			float mid = (m_zMin + m_zMax) / 2.0f;
+			float quart = 1* (m_zMin + m_zMax) / 4.0f;
+			float trois_quart = 3* (m_zMin + m_zMax) / 4.0f;
 			float v = (m_3Dpoints[s].second - m_zMin) / (m_zMax - m_zMin);
-			if(m_3Dpoints[s].second < mid)
+
+			if(m_3Dpoints[s].second < quart)
 			{
-				R = (m_3Dpoints[s].second - m_zMin) / (mid - m_zMin);
+				R = 0.0f;
+				G = (m_3Dpoints[s].second - m_zMin) / (quart - m_zMin);
+				B = 1 - (m_3Dpoints[s].second - m_zMin) / (quart - m_zMin);
+			}
+			else if(m_3Dpoints[s].second >= quart && m_3Dpoints[s].second < trois_quart)
+			{
+				R = (m_3Dpoints[s].second - quart) / (trois_quart - quart);
 				G = 1.0f;
 				B = 0.0f;
 			}
@@ -386,8 +395,8 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glEnable(GL_POINT_SPRITE);
-			glPointSize(m_3Dpoints[s].second / m_zMax * m_pointSize + 1.0f);
-			glColor4f(R,G,B,m_3Dpoints[s].second / m_zMax *m_alpha);
+			glPointSize(m_3Dpoints[s].second * m_pointSize + 1.0f);
+			glColor4f(R,G,B,(m_3Dpoints[s].second / m_zMax) * m_alpha + 0.1f);
 
 			//glActiveTexture(GL_TEXTURE0);
 			//glEnable( GL_TEXTURE_2D );
