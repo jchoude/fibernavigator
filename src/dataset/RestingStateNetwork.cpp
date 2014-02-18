@@ -350,6 +350,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
 		{
 			float R,G,B;
+            bool render = true;
 			/*if(m_3Dpoints[s].second < 0.25f)
 			{
 				R = m_3Dpoints[s].second / 0.25f;
@@ -369,27 +370,28 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
 			}*/
 			float mid = (m_zMin + m_zMax) / 2.0f;
-			float quart = 1* (m_zMin + m_zMax) / 4.0f;
-			float trois_quart = 3* (m_zMin + m_zMax) / 4.0f;
+			float quart = 1.0f* (m_zMin + m_zMax) / 4.0f;
+			float trois_quart = 3.0f* (m_zMin + m_zMax) / 4.0f;
 			float v = (m_3Dpoints[s].second - m_zMin) / (m_zMax - m_zMin);
 
 			if(m_3Dpoints[s].second < quart)
 			{
-				R = 0.0f;
-				G = (m_3Dpoints[s].second - m_zMin) / (quart - m_zMin);
-				B = 1 - (m_3Dpoints[s].second - m_zMin) / (quart - m_zMin);
+                R = (m_3Dpoints[s].second - m_zMin) / (quart - m_zMin);
+                G = 0.0f;
+                B = 0.0f;
+                render = false;
 			}
 			else if(m_3Dpoints[s].second >= quart && m_3Dpoints[s].second < trois_quart)
 			{
-				R = (m_3Dpoints[s].second - quart) / (trois_quart - quart);
-				G = 1.0f;
+				R = 1.0f;
+				G = (m_3Dpoints[s].second - quart) / (trois_quart - quart);
 				B = 0.0f;
 			}
 			else
 			{
 				R = 1.0f;
-				G = 1 - (v);
-				B = 0.0f;
+				G = 1.0f;
+				B = v;
 			}
 
 			glEnable(GL_BLEND);
@@ -404,9 +406,13 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
 			//glBindTexture(GL_TEXTURE_2D, m_lookupTex);
 
-			glBegin(GL_POINTS);
-				glVertex3f(m_3Dpoints[s].first.x * m_xL, m_3Dpoints[s].first.y * m_yL, m_3Dpoints[s].first.z * m_zL);
-			glEnd();
+            if(render)
+            {
+			    glBegin(GL_POINTS);
+				    glVertex3f(m_3Dpoints[s].first.x * m_xL, m_3Dpoints[s].first.y * m_yL, m_3Dpoints[s].first.z * m_zL);
+			    glEnd();
+                render = true;
+            }
 
 			//glDisable( GL_TEXTURE_2D );
 			glDisable(GL_POINT_SPRITE);
