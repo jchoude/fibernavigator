@@ -414,7 +414,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
             if(render)
             {
 			    glBegin(GL_POINTS);
-				    glVertex3f(m_3Dpoints[s].first.x, m_3Dpoints[s].first.y, m_3Dpoints[s].first.z);
+				    glVertex3f(m_3Dpoints[s].first.x * m_xL, m_3Dpoints[s].first.y * m_yL, m_3Dpoints[s].first.z * m_zL);
 			    glEnd();
                 render = true;
             }
