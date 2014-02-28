@@ -165,6 +165,7 @@ protected:
     float       m_voxelSizeX;
     float       m_voxelSizeY;
     float       m_voxelSizeZ;
+	Vector      m_origin;
 };
 
 #endif /*DATASETINFO_H_*/

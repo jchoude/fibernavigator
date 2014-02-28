@@ -54,9 +54,12 @@ m_pointSize( 5.0f ),
 m_isRealTimeOn( false ),
 m_dataType( 16 ),
 m_bands( 108 ),
-m_corrThreshold( 3.0f ),
+m_corrThreshold( 1.96f ),
 m_colorSliderValue( 5.0f ),
-m_normalize( true )
+m_normalize( true ),
+m_boxMoving( false ),
+m_originL(0,0,0),
+m_origin(0,0,0)
 {
 	m_rowsL = DatasetManager::getInstance()->getRows();
 	m_columnsL = DatasetManager::getInstance()->getColumns();
@@ -67,6 +70,12 @@ m_normalize( true )
 	m_zL =  DatasetManager::getInstance()->getVoxelZ();
 
 	m_datasetSizeL = m_rowsL * m_columnsL * m_framesL;
+
+	FMatrix &t = DatasetManager::getInstance()->getNiftiTransform();
+	m_originL.x = floor(abs(t(0,3)) / m_xL);
+	m_originL.y = floor(abs(t(1,3)) / m_yL);
+	m_originL.z = floor(abs(t(2,3)) / m_zL);
+
 }
 
 //////////////////////////////////////////
@@ -75,7 +84,6 @@ m_normalize( true )
 RestingStateNetwork::~RestingStateNetwork()
 {
     Logger::getInstance()->print( wxT( "RestingStateNetwork destructor called but nothing to do." ), LOGLEVEL_DEBUG );
-	//cudaFree(d_data);
 }
 
 //////////////////////////////////////////
@@ -92,9 +100,25 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
     m_voxelSizeX = pHeader->dx;
     m_voxelSizeY = pHeader->dy;
     m_voxelSizeZ = pHeader->dz;
-    
+
+	if( pHeader->sform_code > 0 )
+    {
+		m_origin.x = floor(pHeader->sto_ijk.m[0][3]);
+		m_origin.y = floor(pHeader->sto_ijk.m[1][3]);
+		m_origin.z = floor(pHeader->sto_ijk.m[2][3]);
+    }
+    else if( pHeader->qform_code > 0 )
+    {
+        m_origin.x = floor(pHeader->qto_ijk.m[0][3]);
+		m_origin.y = floor(pHeader->qto_ijk.m[1][3]);
+        m_origin.z = floor(pHeader->qto_ijk.m[2][3]);
+    }
+    else
+    {
+        Logger::getInstance()->print( wxT( "No transformation encoded in the nifti file. Alignement will fail." ), LOGLEVEL_WARNING );
+    }
+ 
 	std::vector<short int> fileFloatData( m_datasetSize * m_bands, 0);
-	//cuData = new short int[m_datasetSize*m_bands];
 
 	if(pHeader->datatype == 4)
 	{
@@ -104,9 +128,7 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 		{
 			for( int j( 0 ); j < m_bands; ++j )
 			{
-				//if(!isnan(pData[j * datasetSize + i]))
-					//cuData[i * m_bands + j] = pData[j * m_datasetSize + i];
-					fileFloatData[i * m_bands + j] = pData[j * m_datasetSize + i];
+				fileFloatData[i * m_bands + j] = pData[j * m_datasetSize + i];
 			}
 		}
 	}
@@ -118,15 +140,12 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 		{
 			for( int j( 0 ); j < m_bands; ++j )
 			{
-				//if(!isnan(pData[j * datasetSize + i]))
-					fileFloatData[i * m_bands + j] = pData[j * m_datasetSize + i];
+				fileFloatData[i * m_bands + j] = pData[j * m_datasetSize + i];
 			}
 		}
 		
 	}
-	//std::cout << "Before: " << cuData[2000];
-	//cudaMalloc(&d_data, m_datasetSize * m_bands * sizeof(short int));
-	//cudaMemcpy(d_data, cuData, m_datasetSize * m_bands * sizeof(short int), cudaMemcpyHostToDevice);
+
 	//Assign structure to a 2D vector of timelaps
     createStructure( fileFloatData );
 
@@ -195,7 +214,6 @@ bool RestingStateNetwork::createStructure( std::vector< short int > &i_fileFloat
 		}
     }
 
-	
 	m_volumes.resize(m_bands);
 	m_meansAndSigmas.resize(size);
 	//Transpose signal for easy acces of timelaps
@@ -245,25 +263,29 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 		{
 			for( float z = 0; z < m_frames; z++)
 			{
+				//from fspace to t1space
 				int i = z * m_columns * m_rows + y *m_columns + x;
-				int s = z * floor(float(m_framesL/m_frames)) * m_columnsL * m_rowsL + y *floor(float(m_rowsL/m_rows)) *m_columnsL + x * floor(float(m_columnsL/m_columns)); // O
+				int zz = ((z - m_origin.z) * m_voxelSizeZ / m_zL) + m_originL.z;
+				int yy = ((y - m_origin.y) * m_voxelSizeY / m_yL) + m_originL.y;
+				int xx = ((x - m_origin.x) * m_voxelSizeX / m_xL) + m_originL.x;
+				int s = zz * m_columnsL * m_rowsL + yy * m_columnsL + xx ; // O
 				
 				vol[s*3] = m_signalNormalized[i][sliderValue];
 				vol[s*3 + 1] = m_signalNormalized[i][sliderValue];
 				vol[s*3 + 2] = m_signalNormalized[i][sliderValue];
 
 				//Patch arround for 1x1x1
-				if(m_framesL != m_frames)
-				{
-					indexes = get3DIndexes(x,y,z);
-					for(unsigned int s = 0; s < indexes.size(); s++)
-					{
-						int id = indexes[s];
-						vol[id*3] = m_signalNormalized[i][sliderValue];
-						vol[id*3 + 1] = m_signalNormalized[i][sliderValue];
-						vol[id*3 + 2] = m_signalNormalized[i][sliderValue];
-					}
-				}
+				//if(m_framesL != m_frames)
+				//{
+				//	indexes = get3DIndexes(x,y,z);
+				//	for(unsigned int s = 0; s < indexes.size(); s++)
+				//	{
+				//		int id = indexes[s];
+				//		vol[id*3] = m_signalNormalized[i][sliderValue];
+				//		vol[id*3 + 1] = m_signalNormalized[i][sliderValue];
+				//		vol[id*3 + 2] = m_signalNormalized[i][sliderValue];
+				//	}
+				//}
 			}
 		}
 	}
@@ -291,6 +313,7 @@ void RestingStateNetwork::seedBased()
 	m_3Dpoints.clear();
 	m_zMin = 999.0f;
 	m_zMax = 0.0f;
+	m_boxMoving = true;
 	 
 	std::vector<float> positions; 
 
@@ -312,8 +335,11 @@ void RestingStateNetwork::seedBased()
 			{
 				for( float z = minCorner.z; z <= maxCorner.z; z++)
 				{
-					//Switch to 3x3x3
-					int i = floor(float(z *m_frames/m_framesL))* m_columns * m_rows + floor(float(y *m_rows/m_rowsL))*m_columns + floor(float(x * m_columns/m_columnsL));
+					//Switch to 3x3x3 from t1space
+					int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+					int yy = ((y - m_originL.y) * m_yL/ m_voxelSizeY) + m_origin.y;
+					int xx = ((x - m_originL.x) * m_xL /m_voxelSizeX) + m_origin.x;
+					int i = zz * m_columns * m_rows + yy * m_columns + xx ; // O
 					positions.push_back( i );
 				}
 			}
@@ -321,19 +347,15 @@ void RestingStateNetwork::seedBased()
 		correlate(positions);
 	}
 	
-	//normalize min/max
+	//TODO can be done in rendering directly while looping, change from fspace to t1space
     for(unsigned int s(0); s < m_3Dpoints.size(); ++s )
     {
-		//if(m_normalize)
-			//m_3Dpoints[s].second = (m_3Dpoints[s].second - m_zMin) / ( m_zMax - m_zMin);
-
-		//Reset to 1x1x1
-		m_3Dpoints[s].first.x *= floor(float(m_columnsL/m_columns));
-		m_3Dpoints[s].first.y *= floor(float(m_rowsL/m_rows));
-		m_3Dpoints[s].first.z *= floor(float(m_framesL/m_frames));
+		m_3Dpoints[s].first.x = ((m_3Dpoints[s].first.x - m_origin.x) * m_voxelSizeX / m_xL) + m_originL.x;
+		m_3Dpoints[s].first.y = ((m_3Dpoints[s].first.y - m_origin.y) * m_voxelSizeY / m_yL) + m_originL.y;
+		m_3Dpoints[s].first.z = ((m_3Dpoints[s].first.z - m_origin.z) * m_voxelSizeZ / m_zL) + m_originL.z;
     }
 
-	render3D(true);
+	render3D(false);
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
 }
 
@@ -351,24 +373,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 		{
 			float R,G,B;
             bool render = true;
-			/*if(m_3Dpoints[s].second < 0.25f)
-			{
-				R = m_3Dpoints[s].second / 0.25f;
-				G = 0.0f;
-				B = 0.0f;
-			}
-			else if(m_3Dpoints[s].second < 0.75f && m_3Dpoints[s].second > 0.25f)
-			{
-				R = 1.0;
-				G = (m_3Dpoints[s].second - 0.25f) / 0.5f;
-				B = 0.0f;
-			}
-			else if(m_3Dpoints[s].second > 0.75f)
-			{
-				R = 1.0f;
-				G = 1.0f;
-				B = (m_3Dpoints[s].second - 0.75f) / 0.25f;
-			}*/
+
 			float mid = (m_zMin + m_zMax) / 2.0f;
 			float quart = 1.0f* (m_zMin + m_zMax) / 4.0f;
 			float trois_quart = 3.0f* (m_zMin + m_zMax) / 4.0f;
@@ -409,7 +414,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
             if(render)
             {
 			    glBegin(GL_POINTS);
-				    glVertex3f(m_3Dpoints[s].first.x * m_xL, m_3Dpoints[s].first.y * m_yL, m_3Dpoints[s].first.z * m_zL);
+				    glVertex3f(m_3Dpoints[s].first.x, m_3Dpoints[s].first.y, m_3Dpoints[s].first.z);
 			    glEnd();
                 render = true;
             }
@@ -422,23 +427,25 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			if(recalculateTexture)
 			{
 				std::vector<int> indexes;
-				int i = m_3Dpoints[s].first.z * m_columnsL * m_rowsL + m_3Dpoints[s].first.y  *m_columnsL + m_3Dpoints[s].first.x ; // O
+				//Must be in t1space
+				int i = m_3Dpoints[s].first.z * m_columnsL * m_rowsL + m_3Dpoints[s].first.y * m_columnsL + m_3Dpoints[s].first.x ; // O
+				
 				texture[i*3] = R;
 				texture[i*3 + 1] = G;
 				texture[i*3 + 2] = B;
 
 				//Patch arround for 1x1x1
-				if(m_framesL != m_frames)
-				{
-					indexes = get3DIndexes(floor(float(m_3Dpoints[s].first.x * m_columns/m_columnsL)),floor(float(m_3Dpoints[s].first.y * m_rows/m_rowsL)),floor(float(m_3Dpoints[s].first.z * m_frames/m_framesL)));
-					for(unsigned int u = 0; u < indexes.size(); u++)
-					{
-						int id = indexes[u];
-						texture[id*3] = R;
-						texture[id*3 + 1] = G;
-						texture[id*3 + 2] = B;
-					}
-				}
+				//if(m_framesL != m_frames)
+				//{
+				//	indexes = get3DIndexes(floor(float(m_3Dpoints[s].first.x * m_columns/m_columnsL)),floor(float(m_3Dpoints[s].first.y * m_rows/m_rowsL)),floor(float(m_3Dpoints[s].first.z * m_frames/m_framesL)));
+				//	for(unsigned int u = 0; u < indexes.size(); u++)
+				//	{
+				//		int id = indexes[u];
+				//		texture[id*3] = R;
+				//		texture[id*3 + 1] = G;
+				//		texture[id*3 + 2] = B;
+				//	}
+				//}
 			}
 		}
 		//TEXTURE
@@ -457,23 +464,6 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 //////////////////////////////////////////////////////////////////////////////////////////
 void RestingStateNetwork::correlate(std::vector<float>& positions)
 {
-	 //float data[N]; int count = 0;
-	//int N = m_rows * m_columns * m_bands;
-	//cuData = new float[m_rows][m_columns];
-	//for(int i =0; i<N;i++)
-	//	cuData[i] = i+0.1f;
-
-	//std::cout << "Before: " << cuData[1];
-	//cudaMalloc(&d_data, N * sizeof(float));
-	//cudaMemcpy(d_data, cuData, N * sizeof(float), cudaMemcpyHostToDevice);
-	//int block_size = 512;
-	//int n_blocks = N/block_size + (N%block_size == 0 ? 0:1);
-	//cuCorrelation<<<n_blocks,block_size>>>(d_data);
- //   cudaMemcpy(cuData, d_data, N * sizeof(float), cudaMemcpyDeviceToHost);
- //    
-	//std::cout <<"after " << cuData[1];
-
-	
 	//Mean signal inside box
 	std::vector<float> meanSignal;
 	for(int i=0; i < m_bands; i++)

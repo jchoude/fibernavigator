@@ -31,6 +31,8 @@ public:
 	void seedBased();
 	size_t getSize()                               { return m_3Dpoints.size(); }
 	void clear3DPoints()                           { m_3Dpoints.clear(); }
+	void setBoxMoving(bool move)				{m_boxMoving = move;}
+	bool isBoxMoving() {return m_boxMoving;}
 
 	std::vector<std::pair<Vector,float> >* getZscores() { return &m_3Dpoints; }
 	DatasetIndex getIndex()   { return m_index; }
@@ -83,6 +85,9 @@ private:
 	float m_zL;
 	int m_datasetSizeL;
 	bool m_normalize; 
+	bool m_boxMoving;
+	Vector m_originL;
+	Vector m_origin; 
 
 };
 

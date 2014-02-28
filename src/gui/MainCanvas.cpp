@@ -805,7 +805,9 @@ void MainCanvas::render()
                 }
 				else if(RTFMRIHelper::getInstance()->isRTFMRIActive())
 				{
-					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(false);
+					bool move = DatasetManager::getInstance()->m_pRestingStateNetwork->isBoxMoving();
+					DatasetManager::getInstance()->m_pRestingStateNetwork->render3D(move);
+					DatasetManager::getInstance()->m_pRestingStateNetwork->setBoxMoving(false);
 				}
 
                 //save context for picking
