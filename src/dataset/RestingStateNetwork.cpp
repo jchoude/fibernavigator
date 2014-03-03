@@ -101,6 +101,8 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
     m_voxelSizeY = pHeader->dy;
     m_voxelSizeZ = pHeader->dz;
 
+
+
 	if( pHeader->sform_code > 0 )
     {
 		m_origin.x = floor(pHeader->sto_ijk.m[0][3]);
@@ -256,36 +258,65 @@ vector<int> RestingStateNetwork::get3DIndexes(int x, int y, int z)
 void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 {
 	std::vector<float> vol(m_datasetSizeL* 3, 0.0f);
-	std::vector<int> indexes;
-	for( float x = 0; x < m_columns; x++)
-	{
-		for( float y = 0; y < m_rows; y++)
-		{
-			for( float z = 0; z < m_frames; z++)
-			{
-				//from fspace to t1space
-				int i = z * m_columns * m_rows + y *m_columns + x;
-				int zz = ((z - m_origin.z) * m_voxelSizeZ / m_zL) + m_originL.z;
-				int yy = ((y - m_origin.y) * m_voxelSizeY / m_yL) + m_originL.y;
-				int xx = ((x - m_origin.x) * m_voxelSizeX / m_xL) + m_originL.x;
-				int s = zz * m_columnsL * m_rowsL + yy * m_columnsL + xx ; // O
-				
-				vol[s*3] = m_signalNormalized[i][sliderValue];
-				vol[s*3 + 1] = m_signalNormalized[i][sliderValue];
-				vol[s*3 + 2] = m_signalNormalized[i][sliderValue];
+	//std::vector<int> indexes;
+	//for( float x = 0; x < m_columns; x++)
+	//{
+	//	for( float y = 0; y < m_rows; y++)
+	//	{
+	//		for( float z = 0; z < m_frames; z++)
+	//		{
+	//			//from fspace to t1space
+	//			int i = z * m_columns * m_rows + y *m_columns + x;
+	//			int zz = ((z - m_origin.z) * m_voxelSizeZ / m_zL) + m_originL.z;
+	//			int yy = ((y - m_origin.y) * m_voxelSizeY / m_yL) + m_originL.y;
+	//			int xx = ((x - m_origin.x) * m_voxelSizeX / m_xL) + m_originL.x;
 
-				//Patch arround for 1x1x1
-				//if(m_framesL != m_frames)
-				//{
-				//	indexes = get3DIndexes(x,y,z);
-				//	for(unsigned int s = 0; s < indexes.size(); s++)
-				//	{
-				//		int id = indexes[s];
-				//		vol[id*3] = m_signalNormalized[i][sliderValue];
-				//		vol[id*3 + 1] = m_signalNormalized[i][sliderValue];
-				//		vol[id*3 + 2] = m_signalNormalized[i][sliderValue];
-				//	}
-				//}
+	//			if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columnsL && yy <= m_rowsL && zz <= m_framesL)
+	//			{
+	//				int s = zz * m_columnsL * m_rowsL + yy * m_columnsL + xx ; // O
+	//			
+	//				vol[s*3] = m_signalNormalized[i][sliderValue];
+	//				vol[s*3 + 1] = m_signalNormalized[i][sliderValue];
+	//				vol[s*3 + 2] = m_signalNormalized[i][sliderValue];
+	//			}
+
+	//			//Patch arround for 1x1x1
+	//			//if(m_framesL != m_frames)
+	//			//{
+	//			//	indexes = get3DIndexes(x,y,z);
+	//			//	for(unsigned int s = 0; s < indexes.size(); s++)
+	//			//	{
+	//			//		int id = indexes[s];
+	//			//		vol[id*3] = m_signalNormalized[i][sliderValue];
+	//			//		vol[id*3 + 1] = m_signalNormalized[i][sliderValue];
+	//			//		vol[id*3 + 2] = m_signalNormalized[i][sliderValue];
+	//			//	}
+	//			//}
+	//		}
+	//	}
+	//}
+
+	for(int x = 0; x < m_columnsL; x++)
+	{
+		for(int y = 0; y < m_rowsL; y++)
+		{
+			for(int z = 0; z < m_framesL; z++)
+			{
+				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
+
+				int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+				int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+				int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+
+				if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columns && yy <= m_rows && zz <= m_frames)
+				{
+					int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+
+					vol[i*3] = m_signalNormalized[s][sliderValue];
+					vol[i*3 + 1] = m_signalNormalized[s][sliderValue];
+					vol[i*3 + 2] = m_signalNormalized[s][sliderValue];
+				}
+
 			}
 		}
 	}
@@ -311,6 +342,8 @@ void RestingStateNetwork::SetTextureFromNetwork()
 void RestingStateNetwork::seedBased()
 {
 	m_3Dpoints.clear();
+	smallt.assign(m_datasetSize*3,0.0f);
+
 	m_zMin = 999.0f;
 	m_zMax = 0.0f;
 	m_boxMoving = true;
@@ -423,34 +456,71 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			glDisable(GL_POINT_SPRITE);
 			glDisable(GL_BLEND);
 
-			//check for Unnecesssary computation when static scene
-			if(recalculateTexture)
-			{
-				std::vector<int> indexes;
-				//Must be in t1space
-				int i = m_3Dpoints[s].first.z * m_columnsL * m_rowsL + m_3Dpoints[s].first.y * m_columnsL + m_3Dpoints[s].first.x ; // O
-				
-				texture[i*3] = R;
-				texture[i*3 + 1] = G;
-				texture[i*3 + 2] = B;
+			int zz = ((m_3Dpoints[s].first.z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+				int yy = ((m_3Dpoints[s].first.y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+				int xx = ((m_3Dpoints[s].first.x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
 
-				//Patch arround for 1x1x1
-				//if(m_framesL != m_frames)
-				//{
-				//	indexes = get3DIndexes(floor(float(m_3Dpoints[s].first.x * m_columns/m_columnsL)),floor(float(m_3Dpoints[s].first.y * m_rows/m_rowsL)),floor(float(m_3Dpoints[s].first.z * m_frames/m_framesL)));
-				//	for(unsigned int u = 0; u < indexes.size(); u++)
-				//	{
-				//		int id = indexes[u];
-				//		texture[id*3] = R;
-				//		texture[id*3 + 1] = G;
-				//		texture[id*3 + 2] = B;
-				//	}
-				//}
-			}
+				int ss = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+				smallt[ss*3] = R;
+				smallt[ss*3+1] = G;
+				smallt[ss*3+2] = B;
+
+			//check for Unnecesssary computation when static scene
+			//if(recalculateTexture)
+			//{
+			//	std::vector<int> indexes;
+			//	//Must be in t1space
+			//	int i = floor(m_3Dpoints[s].first.z) * m_columnsL * m_rowsL + floor(m_3Dpoints[s].first.y) * m_columnsL + floor(m_3Dpoints[s].first.x) ; // O
+			//	
+			//	texture[i*3] = R;
+			//	texture[i*3 + 1] = G;
+			//	texture[i*3 + 2] = B;
+
+			//	//Patch arround for 1x1x1
+			//	//if(m_framesL != m_frames)
+			//	//{
+			//	//	indexes = get3DIndexes(floor(m_3Dpoints[s].first.x),floor(m_3Dpoints[s].first.y),floor(m_3Dpoints[s].first.z));
+			//	//	for(unsigned int u = 0; u < indexes.size(); u++)
+			//	//	{
+			//	//		int id = indexes[u];
+			//	//		texture[id*3] = R;
+			//	//		texture[id*3 + 1] = G;
+			//	//		texture[id*3 + 2] = B;
+			//	//	}
+			//	//}
+			//}
 		}
+
+
 		//TEXTURE
 		if(recalculateTexture)
 		{
+
+			for(int x = 0; x < m_columnsL; x++)
+	{
+		for(int y = 0; y < m_rowsL; y++)
+		{
+			for(int z = 0; z < m_framesL; z++)
+			{
+				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
+
+				int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+				int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+				int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+
+				if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columns && yy <= m_rows && zz <= m_frames)
+				{
+					int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+
+					texture[i*3] = smallt[s*3];
+					texture[i*3 + 1] = smallt[s*3+1];
+					texture[i*3 + 2] = smallt[s*3+2];
+				}
+
+			}
+		}
+	}
+
 			Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
 			pNewAnatomy->setFloatDataset(texture);
 			pNewAnatomy->generateTexture();

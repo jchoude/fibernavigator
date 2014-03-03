@@ -42,6 +42,7 @@ public:
 	DatasetIndex getBands()   { return m_bands; }
 	
 	std::vector<float> data; //Used for texture mapping
+	std::vector<float> smallt;
 
 private:
     bool createStructure  ( std::vector< short int > &i_fileFloatData );
