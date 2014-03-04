@@ -224,9 +224,7 @@ void FMRIWindow::OnSliderAlphaMoved(  wxCommandEvent& WXUNUSED(event) )
 void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 {
 	//Convert to anat
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetNormalize( false );
 	DatasetManager::getInstance()->m_pRestingStateNetwork->seedBased();
-	DatasetManager::getInstance()->m_pRestingStateNetwork->SetNormalize( true );
 
 	std::vector<std::pair<Vector,float> >* data = DatasetManager::getInstance()->m_pRestingStateNetwork->getZscores();
 	int indx = DatasetManager::getInstance()->createAnatomy( data );

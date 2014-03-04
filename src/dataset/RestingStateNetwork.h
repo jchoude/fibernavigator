@@ -26,13 +26,13 @@ public:
 	void SetColorSliderValue (float value ) { m_colorSliderValue = value; }
 	void SetSizePSliderValue (float value ) { m_pointSize = value; }
 	void SetAlphaSliderValue (float value ) { m_alpha = value; }
-	void SetNormalize (bool value) { m_normalize = value; }
+
 	void render3D(bool recalculateTexture);
 	void seedBased();
 	size_t getSize()                               { return m_3Dpoints.size(); }
 	void clear3DPoints()                           { m_3Dpoints.clear(); }
-	void setBoxMoving(bool move)				{m_boxMoving = move;}
-	bool isBoxMoving() {return m_boxMoving;}
+	void setBoxMoving(bool move)				   { m_boxMoving = move; }
+	bool isBoxMoving() { return m_boxMoving; }
 
 	std::vector<std::pair<Vector,float> >* getZscores() { return &m_3Dpoints; }
 	DatasetIndex getIndex()   { return m_index; }
@@ -42,7 +42,7 @@ public:
 	DatasetIndex getBands()   { return m_bands; }
 	
 	std::vector<float> data; //Used for texture mapping
-	std::vector<float> smallt;
+	std::vector<float> smallt; //3x3x3 zscores
 
 private:
     bool createStructure  ( std::vector< short int > &i_fileFloatData );
@@ -50,7 +50,7 @@ private:
 	void calculateMeanAndSigma(std::vector<float> signal, std::pair<float, float>& params);
 	std::vector<int> get3DIndexes(int x, int y, int z);
 	
-    std::vector<std::vector<short int> >   m_signal; //2D containing the data
+    
 	std::vector<std::vector<float> >   m_signalNormalized; //2D containing the data normalized
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
 	std::vector<std::pair< float, float > > m_meansAndSigmas; 
@@ -61,9 +61,6 @@ private:
 	float m_alpha;
 	float m_pointSize;
 	GLuint m_lookupTex;
-
-	float* cuData;
-	float *d_data;
 
 	bool m_isRealTimeOn;
     int m_dataType;
