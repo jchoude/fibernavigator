@@ -56,8 +56,6 @@ m_origin(0,0,0)
 
 	m_datasetSizeL = m_rowsL * m_columnsL * m_framesL;
 
-	smallt.assign(m_datasetSize*3,0.0f);
-
 	FMatrix &t = DatasetManager::getInstance()->getNiftiTransform();
 	m_originL.x = floor(abs(t(0,3)) / m_xL);
 	m_originL.y = floor(abs(t(1,3)) / m_yL);
@@ -78,6 +76,7 @@ RestingStateNetwork::~RestingStateNetwork()
 bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 {
     m_datasetSize = pHeader->dim[1] * pHeader->dim[2] * pHeader->dim[3];
+	m_smallt.assign(m_datasetSize*3,0.0f);
 	m_rows = pHeader->dim[1];
 	m_columns = pHeader->dim[2];
 	m_frames = pHeader->dim[3];
@@ -276,9 +275,9 @@ void RestingStateNetwork::SetTextureFromNetwork()
 				{
 					int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
 
-					texture[i*3] = smallt[s*3];
-					texture[i*3 + 1] = smallt[s*3+1];
-					texture[i*3 + 2] = smallt[s*3+2];
+					texture[i*3] = m_smallt[s*3];
+					texture[i*3 + 1] = m_smallt[s*3+1];
+					texture[i*3 + 2] = m_smallt[s*3+2];
 				}
 
 			}
@@ -297,7 +296,7 @@ void RestingStateNetwork::SetTextureFromNetwork()
 void RestingStateNetwork::seedBased()
 {
 	m_3Dpoints.clear();
-	smallt.assign(m_datasetSize*3,0.0f);
+	m_smallt.assign(m_datasetSize*3,0.0f);
 
 	m_zMin = 999.0f;
 	m_zMax = 0.0f;
@@ -416,9 +415,9 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 				int xx = ((m_3Dpoints[s].first.x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
 
 				int ss = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-				smallt[ss*3] = R;
-				smallt[ss*3+1] = G;
-				smallt[ss*3+2] = B;	
+				m_smallt[ss*3] = R;
+				m_smallt[ss*3+1] = G;
+				m_smallt[ss*3+2] = B;	
 		}
 
 
@@ -442,9 +441,9 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 						{
 							int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
 
-							texture[i*3] = smallt[s*3];
-							texture[i*3 + 1] = smallt[s*3+1];
-							texture[i*3 + 2] = smallt[s*3+2];
+							texture[i*3] = m_smallt[s*3];
+							texture[i*3 + 1] = m_smallt[s*3+1];
+							texture[i*3 + 2] = m_smallt[s*3+2];
 						}
 
 					}
@@ -566,11 +565,54 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 					{
 						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
 					}
-				
 				}
 			}
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//Export Zscore to T1 map for saving
+//////////////////////////////////////////////////////////////////////////////////////////
+std::vector<float>* RestingStateNetwork::getZscores()
+{
+	m_zMap.assign(m_datasetSizeL, 0.0f);
+	std::vector<float> dataf(m_datasetSize, 0.0f);
+
+	//First, create 3x3x3 texture with zscores instead of RGB values like done in render3d.
+	for( size_t s = 0; s < m_3Dpoints.size(); s++)
+	{
+		int zz = ((m_3Dpoints[s].first.z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+		int yy = ((m_3Dpoints[s].first.y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+		int xx = ((m_3Dpoints[s].first.x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+
+		int ss = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+		dataf[ss] = m_3Dpoints[s].second;
+	}
+
+	//Then, generate 1x1x1 texture (trilinear can be done here)
+	for(int x = 0; x < m_columnsL; x++)
+	{
+		for(int y = 0; y < m_rowsL; y++)
+		{
+			for(int z = 0; z < m_framesL; z++)
+			{
+				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
+
+				int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+				int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+				int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+
+				if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columns && yy <= m_rows && zz <= m_frames)
+				{
+					int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+					m_zMap[i] = dataf[s];
+				}
+			}
+		}
+	}
+
+	return &m_zMap;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

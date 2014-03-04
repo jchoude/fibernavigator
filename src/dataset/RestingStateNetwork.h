@@ -34,7 +34,7 @@ public:
 	void setBoxMoving(bool move)				   { m_boxMoving = move; }
 	bool isBoxMoving() { return m_boxMoving; }
 
-	std::vector<std::pair<Vector,float> >* getZscores() { return &m_3Dpoints; }
+	std::vector<float>* getZscores();
 	DatasetIndex getIndex()   { return m_index; }
 	DatasetIndex getColumns() { return m_columns; }
 	DatasetIndex getRows()    { return m_rows; }
@@ -42,8 +42,7 @@ public:
 	DatasetIndex getBands()   { return m_bands; }
 	
 	std::vector<float> data; //Used for texture mapping
-	std::vector<float> smallt; //3x3x3 zscores
-
+	
 private:
     bool createStructure  ( std::vector< short int > &i_fileFloatData );
 	void correlate(std::vector< float >& position);
@@ -55,6 +54,8 @@ private:
 	std::vector<std::vector<float> >   m_volumes; //2D containing the data normalized volume-wise aligned
 	std::vector<std::pair< float, float > > m_meansAndSigmas; 
 	std::vector<std::pair<Vector,float> > m_3Dpoints; //3D points and their positions
+	std::vector<float> m_smallt; //3x3x3 RGB values
+	std::vector<float> m_zMap; //1x1x1 zscores
 	
 	float m_zMin;
 	float m_zMax;

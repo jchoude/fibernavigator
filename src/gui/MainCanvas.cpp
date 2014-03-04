@@ -1488,7 +1488,7 @@ void MainCanvas::segment()
     }
 
     //Create a new anatomy for the tumor
-    int indx = DatasetManager::getInstance()->createAnatomy( resultData, 0 );
+	int indx = DatasetManager::getInstance()->createAnatomy( resultData, HEAD_BYTE );
     Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( indx );
     pNewAnatomy->setShowFS(false);
     // TODO: Change hard coded value and use enum instead
