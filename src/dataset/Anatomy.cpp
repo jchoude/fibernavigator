@@ -130,8 +130,26 @@ Anatomy::Anatomy( std::vector< float >* pDataset,
 
     m_isLoaded = true;
 
-    m_floatDataset.resize( m_columns * m_frames * m_rows );
+	int datasetSize = m_columns * m_frames * m_rows;
+    m_floatDataset.resize( datasetSize );
     std::copy( pDataset->begin(), pDataset->end(), m_floatDataset.begin() );
+
+	float dataMax = 0.0f;
+    for( int i(0); i < datasetSize; ++i )
+    {
+        if (m_floatDataset[i] > dataMax)
+        {
+            dataMax = m_floatDataset[i];
+        }
+    }
+
+    for( int i(0); i < datasetSize; ++i )
+    {
+        m_floatDataset[i] = m_floatDataset[i] / dataMax;
+    }
+
+    m_oldMax    = dataMax;
+    m_newMax    = 1.0;
 }
 
 Anatomy::Anatomy( const int type )
@@ -958,6 +976,20 @@ void Anatomy::saveNifti( wxString fileName )
             tmp[i]                   = (*pDataset)[i * 3]     * 255.0f;
             tmp[datasetSize + i]     = (*pDataset)[i * 3 + 1] * 255.0f;
             tmp[2 * datasetSize + i] = (*pDataset)[i * 3 + 2] * 255.0f;
+        }
+        
+        // Do not move the call to nifti_image_write out of the 
+        // if, because it will crash, since the temp vector will
+        // not exist anymore, and pImage->data will point to garbage.
+        pImage->data = &tmp[0];
+        nifti_image_write( pImage );
+    }
+	else if( m_type == OVERLAY )
+    {
+        vector<float> tmp( pDataset->size() );
+        for(unsigned int i(0); i < pDataset->size(); ++i )
+        {
+            tmp[i] = (float)( (*pDataset)[i] * m_oldMax );
         }
         
         // Do not move the call to nifti_image_write out of the 

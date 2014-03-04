@@ -328,6 +328,8 @@ void TheScene::renderScene()
     {
         drawSelectionObjects();
     }
+	
+	drawColorMapLegend();
 
     Logger::getInstance()->printIfGLError( wxT( "Rendering Scene" ) );
 
