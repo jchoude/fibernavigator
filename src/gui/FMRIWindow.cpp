@@ -234,6 +234,7 @@ void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
 
     pNewAnatomy->setType(OVERLAY);
     pNewAnatomy->setDataType(16);
+	pNewAnatomy->setShowFS(true);
     pNewAnatomy->setName( wxT("Z-score map") );
     MyApp::frame->m_pListCtrl->InsertItem( indx );
 

@@ -599,15 +599,65 @@ std::vector<float>* RestingStateNetwork::getZscores()
 			{
 				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
 
-				int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-				int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-				int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+				//int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+				//int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+				//int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
 
-				if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columns && yy <= m_rows && zz <= m_frames)
+				//if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columns && yy <= m_rows && zz <= m_frames)
+				//{
+				//	int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+				//	m_zMap[i] = dataf[s];
+				//}
+
+				float zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+				float yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+				float xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+
+				if(xx >1 && yy >1 && zz >1 && xx < m_columns && yy < m_rows && zz < m_frames)
 				{
-					int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
-					m_zMap[i] = dataf[s];
+					const int x = (unsigned int) min( (int)std::floor(xx / DatasetManager::getInstance()->getVoxelX() ), m_columns-1 );
+					const int y = (unsigned int) min( (int)std::floor(yy / DatasetManager::getInstance()->getVoxelY() ), m_rows-1 );
+					const int z = (unsigned int) min( (int)std::floor(zz / DatasetManager::getInstance()->getVoxelZ() ), m_frames-1 );
+
+					const float dx = ( xx / DatasetManager::getInstance()->getVoxelX() )-x;
+					const float dy = ( yy / DatasetManager::getInstance()->getVoxelY() )-y;
+					const float dz = ( zz / DatasetManager::getInstance()->getVoxelZ() )-z;
+
+					const int nx = dx > 0.0 ? min( max(x+1,0), m_columns-1 ) : min( max(x,0), m_columns-1 );
+					const int ny = dy > 0.0 ? min( max(y+1,0), m_rows-1 ) : min( max(y,0), m_rows-1 );
+					const int nz = dz > 0.0 ? min( max(z+1,0), m_frames-1 ) : min( max(z,0), m_frames-1 );
+
+					// Compute interpolated value at (fx,fy,fz)
+					//Corresponding tensor number
+					int tensor_xyz = z * m_columns * m_rows + y * m_columns + x;
+
+					int tensor_nxyz = z * m_columns * m_rows + y * m_columns + nx;
+
+					int tensor_xnyz = z * m_columns * m_rows + ny * m_columns + x;
+
+					int tensor_nxnyz = z * m_columns * m_rows + ny * m_columns + nx;
+
+					int tensor_xynz = nz * m_columns * m_rows + y * m_columns + x;
+
+					int tensor_nxynz = nz * m_columns * m_rows + y * m_columns + nx;
+
+					int tensor_xnynz = nz * m_columns * m_rows + ny * m_columns + x;
+
+					int tensor_nxnynz = nz * m_columns * m_rows + ny * m_columns + nx;
+
+					float valx0 = (1-dx) * dataf[tensor_xyz]  + (dx) * dataf[tensor_nxyz];
+					float valx1 = (1-dx) * dataf[tensor_xnyz] + (dx) * dataf[tensor_nxnyz];
+
+					const float valy0 = (1-dy) * valx0 + (dy) * valx1;
+					valx0 = (1-dx) * dataf[tensor_xynz]  + (dx) * dataf[tensor_nxynz];
+					valx1 = (1-dx) * dataf[tensor_xnynz] + (dx) * dataf[tensor_nxnynz];
+
+					const float valy1 = (1-dy) * valx0 + (dy) * valx1;
+
+					m_zMap[i] = (1-dz) * valy0 + (dz) * valy1;
+
 				}
+				
 			}
 		}
 	}
