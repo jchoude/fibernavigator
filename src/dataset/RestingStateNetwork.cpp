@@ -541,6 +541,9 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 	//Calculate z-scores, and save them.
 	sigma /= nb;
 	sigma = sqrt(sigma);
+	vector<float> zErode(m_datasetSize, 0);
+	vector<bool> binErode(m_datasetSize, false);
+
 	for( float x = 0; x < m_columns; x++)
 	{
 		for( float y = 0; y < m_rows; y++)
@@ -563,7 +566,31 @@ void RestingStateNetwork::correlate(std::vector<float>& positions)
 						m_zMax = zScore;
 					if(zScore > m_corrThreshold)
 					{
-						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
+						//m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zScore));
+						zErode[i] = zScore;
+						binErode[i] = 1;
+					}
+				}
+			}
+		}
+	}
+
+	//vector<int> eroded = erode(toErode);
+	vector<bool> tmp(m_datasetSize, false);
+	for( float x = 1; x < m_columns-1; x++)
+	{
+		for( float y = 1; y < m_rows-1; y++)
+		{
+			for( float z = 1; z < m_frames-1; z++)
+			{
+				int i = z * m_columns * m_rows + y *m_columns + x;
+				if(binErode[i])
+				{
+					erode(tmp,binErode,i);
+
+					if(tmp[i])
+					{
+						m_3Dpoints.push_back(std::pair<Vector,float>(Vector(x,y,z),zErode[i]));
 					}
 				}
 			}
@@ -663,6 +690,41 @@ std::vector<float>* RestingStateNetwork::getZscores()
 	}
 
 	return &m_zMap;
+}
+
+void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> &inMap, int curIndex)
+{
+	float acc  = inMap[curIndex - 1]
+    + inMap[curIndex + 1]
+    + inMap[curIndex - m_columns - 1]
+    + inMap[curIndex - m_columns]
+    + inMap[curIndex - m_columns + 1]
+    + inMap[curIndex + m_columns - 1]
+    + inMap[curIndex + m_columns]
+    + inMap[curIndex + m_columns + 1]
+    + inMap[curIndex - m_columns * m_rows - 1]
+    + inMap[curIndex - m_columns * m_rows]
+    + inMap[curIndex - m_columns * m_rows + 1]
+    + inMap[curIndex + m_columns * m_rows - 1]
+    + inMap[curIndex + m_columns * m_rows]
+    + inMap[curIndex + m_columns * m_rows + 1]
+    + inMap[curIndex - m_columns * m_rows - m_columns]
+    + inMap[curIndex - m_columns * m_rows + m_columns]
+    + inMap[curIndex + m_columns * m_rows - m_columns]
+    + inMap[curIndex + m_columns * m_rows + m_columns]
+	+ inMap[curIndex - m_columns * m_rows - m_columns - 1]
+    + inMap[curIndex - m_columns * m_rows + m_columns - 1]
+    + inMap[curIndex + m_columns * m_rows - m_columns - 1]
+    + inMap[curIndex + m_columns * m_rows + m_columns - 1]
+	+ inMap[curIndex - m_columns * m_rows - m_columns + 1]
+    + inMap[curIndex - m_columns * m_rows + m_columns + 1]
+    + inMap[curIndex + m_columns * m_rows - m_columns + 1]
+    + inMap[curIndex + m_columns * m_rows + m_columns + 1];
+
+    if( acc > 3.0 )
+    {
+        tmp.at( curIndex ) = true;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
