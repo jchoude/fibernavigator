@@ -711,17 +711,9 @@ void RestingStateNetwork::erode(std::vector<bool> &tmp, const std::vector<bool> 
     + inMap[curIndex - m_columns * m_rows - m_columns]
     + inMap[curIndex - m_columns * m_rows + m_columns]
     + inMap[curIndex + m_columns * m_rows - m_columns]
-    + inMap[curIndex + m_columns * m_rows + m_columns]
-	+ inMap[curIndex - m_columns * m_rows - m_columns - 1]
-    + inMap[curIndex - m_columns * m_rows + m_columns - 1]
-    + inMap[curIndex + m_columns * m_rows - m_columns - 1]
-    + inMap[curIndex + m_columns * m_rows + m_columns - 1]
-	+ inMap[curIndex - m_columns * m_rows - m_columns + 1]
-    + inMap[curIndex - m_columns * m_rows + m_columns + 1]
-    + inMap[curIndex + m_columns * m_rows - m_columns + 1]
-    + inMap[curIndex + m_columns * m_rows + m_columns + 1];
+    + inMap[curIndex + m_columns * m_rows + m_columns];
 
-    if( acc > 3.0 )
+    if( acc > 9.0 )
     {
         tmp.at( curIndex ) = true;
     }
