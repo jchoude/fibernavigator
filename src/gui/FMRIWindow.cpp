@@ -236,6 +236,7 @@ void FMRIWindow::onConvertRestingState( wxCommandEvent& WXUNUSED(event) )
     pNewAnatomy->setDataType(16);
 	pNewAnatomy->setShowFS(true);
     pNewAnatomy->setName( wxT("Z-score map") );
+	pNewAnatomy->setThreshold( 0.01f );
     MyApp::frame->m_pListCtrl->InsertItem( indx );
 
 	RTFMRIHelper::getInstance()->setRTFMRIReady(false);

@@ -437,7 +437,7 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 						int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
 						int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
 
-						if(xx >=0 && yy >=0 && zz >=0 && xx <= m_columns && yy <= m_rows && zz <= m_frames)
+						if(xx >=0 && yy >=0 && zz >=0 && xx < m_columns && yy < m_rows && zz < m_frames)
 						{
 							int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
 
