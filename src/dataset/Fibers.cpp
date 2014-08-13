@@ -2794,12 +2794,24 @@ void Fibers::draw()
 
     if( m_useTransparency )
     {
-        glPushAttrib( GL_ALL_ATTRIB_BITS );
-        glEnable( GL_BLEND );
-        glBlendFunc( GL_ONE, GL_ONE );
-        glDepthMask( GL_FALSE );
-        drawSortedLines();
-        glPopAttrib();
+        if ( !SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
+        {
+            glPushAttrib( GL_ALL_ATTRIB_BITS );
+            glEnable( GL_BLEND );
+            glBlendFunc( GL_ONE, GL_ONE );
+            glDepthMask( GL_FALSE );
+            drawCrossingFibers();
+            glPopAttrib(); 
+        }
+        else
+        {
+            glPushAttrib( GL_ALL_ATTRIB_BITS );
+            glEnable( GL_BLEND );
+            glBlendFunc( GL_ONE, GL_ONE );
+            glDepthMask( GL_FALSE );
+            drawSortedLines();
+            glPopAttrib();
+        }
         return;
     }
 
@@ -3092,9 +3104,11 @@ void Fibers::drawSortedLines()
             dots[0] = Vector3fDot( &v2, &view );
 
             Vector normalVector = Vector(pNormals[idx3 + 0],pNormals[idx3 + 1],pNormals[idx3 + 2]);
-            Vector zVector = Vector(view.s.X, view.s.Y, view.s.Z);
+            //Vector zVector = Vector(view.s.X, view.s.Y, view.s.Z); //View vec
+            Vector zVector = Vector(0,0,1); //Fixed test
 
-            float alphaValue = 1-std::abs(normalVector.Dot(zVector));
+            float alphaValue = std::abs(normalVector.Dot(zVector)); //Opaque
+            //float alphaValue = 1-std::abs(normalVector.Dot(zVector)); //Transparent
             alphaValue = std::pow(alphaValue,3.0f);
 
             glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
