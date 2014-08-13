@@ -3080,12 +3080,39 @@ void Fibers::drawSortedLines()
             int idx3 = idx * 3;
             int id2  = pLineIds[( pSnippletSort[i] << 1 ) + 1];
             int id23 = id2 * 3;
-            glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   m_alpha );
+
+            /* --------------OPACITY TEST -------------*/
+            Matrix4fT transform = SceneManager::getInstance()->getTransform();
+            float dots[8];
+            Vector3fT v1 = { { 0, 0, 1 } };
+            Vector3fT v2 = { { 1, 1, 1 } };
+            Vector3fT view;
+
+            Vector3fMultMat4( &view, &v1, &transform );
+            dots[0] = Vector3fDot( &v2, &view );
+
+            Vector normalVector = Vector(pNormals[idx3 + 0],pNormals[idx3 + 1],pNormals[idx3 + 2]);
+            Vector zVector = Vector(view.s.X, view.s.Y, view.s.Z);
+
+            float alphaValue = 1-std::abs(normalVector.Dot(zVector));
+            alphaValue = std::pow(alphaValue,3.0f);
+
+            glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
+            glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
+            glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
+            glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   alphaValue );
+            glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
+            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
+
+
+            /*glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   m_alpha );
             glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
             glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
             glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   m_alpha );
             glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
-            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
+            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );*/
+
+
         }
     }
 
