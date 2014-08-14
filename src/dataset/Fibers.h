@@ -226,8 +226,10 @@ private:
     Octree                *m_pOctree;
 
     bool            m_cfDrawDirty;
-    bool            m_opDirty;
     float           m_exponent;
+	float           m_xAngle;
+	float           m_yAngle;
+	float           m_zAngle;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;

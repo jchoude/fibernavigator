@@ -78,9 +78,6 @@ public:
 
     void OnFibersFilter                     ( wxCommandEvent& event );
     void OnFibersAlpha                      ( wxCommandEvent& event );
-    void OnFibersXVector                    ( wxCommandEvent& event );
-    void OnFibersYVector                    ( wxCommandEvent& event );
-    void OnFibersZVector                    ( wxCommandEvent& event );
     void OnGenerateFiberVolume              ( wxCommandEvent& event );
     void OnToggleUseTex                     ( wxCommandEvent& event );
     void OnListMenuDistance                 ( wxCommandEvent& event );

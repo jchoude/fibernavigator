@@ -79,8 +79,10 @@ Fibers::Fibers()
     m_fiberColorationMode( NORMAL_COLOR ),
     m_pOctree( NULL ),
     m_cfDrawDirty( true ),
-    m_opDirty( true ),
     m_exponent( 3.0f ),
+	m_xAngle( 0.0f ),
+	m_yAngle( 0.0f ),
+	m_zAngle( 1.0f ),
     m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
     m_coronalShown(  SceneManager::getInstance()->isCoronalDisplayed() ),
     m_sagittalShown( SceneManager::getInstance()->isSagittalDisplayed() ),
@@ -3124,9 +3126,11 @@ void Fibers::drawSortedLines()
             //Vector normalVector = Vector(pNormals[idx3 + 0],pNormals[idx3 + 1],pNormals[idx3 + 2]); 
             Vector normalVector = Vector(m_pointArray[id23 + 0]-m_pointArray[idx3 + 0],m_pointArray[id23 + 1]-m_pointArray[idx3 + 1],m_pointArray[id23 + 2]-m_pointArray[idx3 + 2]);
             normalVector.normalize();
-            Vector zVector = Vector(view.s.X, view.s.Y, view.s.Z); //View vec
-            zVector.normalize();
-            //Vector zVector = Vector(0,0,1); //Fixed test
+            
+			//Vector zVector = Vector(view.s.X, view.s.Y, view.s.Z); //View vec
+            //zVector.normalize();
+
+            Vector zVector = Vector(m_xAngle,m_yAngle,m_zAngle); //Fixed test
 
             //float alphaValue = std::abs(normalVector.Dot(zVector)); //Opaque
             float alphaValue = 1-std::abs(normalVector.Dot(zVector)); //Transparent
@@ -3417,9 +3421,10 @@ void Fibers::updateFibersFilters()
 
 void Fibers::updateAlpha()
 {
-    m_opDirty = true;
     m_exponent = m_pSliderFibersAlpha->GetValue();
-
+	m_xAngle = m_pSliderFibersXVector->GetValue() / 180.0f;
+	m_yAngle = m_pSliderFibersZVector->GetValue() / 180.0f;
+	m_zAngle = m_pSliderFibersYVector->GetValue() / 180.0f;
 }
 
 void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling)
@@ -3517,9 +3522,9 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
                                             DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         3,         0,       5, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersSampling  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersXVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersYVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersZVector  = new wxSlider( pParent, wxID_ANY,         1,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
 #if !_USE_LIGHT_GUI
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
@@ -3612,9 +3617,9 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMax->GetId(),         wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersSampling->GetId(),          wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersAlpha->GetId(),             wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
-    pParent->Connect( m_pSliderFibersXVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersXVector ) );
-    pParent->Connect( m_pSliderFibersYVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersYVector ) );
-    pParent->Connect( m_pSliderFibersZVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersZVector ) );
+    pParent->Connect( m_pSliderFibersXVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersYVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+    pParent->Connect( m_pSliderFibersZVector->GetId(),           wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pSliderInterFibersThickness->GetId(),    wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnCrossingFibersThicknessChange ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),           wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEventHandler( PropertiesWindow::OnToggleUseTex ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),          wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleShowFS ) );

@@ -116,6 +116,10 @@ private:
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
     wxSlider       *m_pSliderInterFibersThickness;
+	wxSlider       *m_pSliderFibersAlpha;
+	wxSlider       *m_pSliderFibersXVector;
+	wxSlider       *m_pSliderFibersYVector;
+	wxSlider       *m_pSliderFibersZVector;
     wxRadioButton  *m_pRadNormalColoring;
     wxRadioButton  *m_pRadDistanceAnchoring;
     wxRadioButton  *m_pRadMinDistanceAnchoring;
@@ -126,6 +130,10 @@ private:
     wxStaticText    *m_pLblMinLength;
     wxStaticText    *m_pLblMaxLength;
     wxStaticText    *m_pLblSubsampling;
+	wxStaticText    *m_pLblAlpha;
+	wxStaticText    *m_pLblXVector;
+	wxStaticText    *m_pLblYVector;
+	wxStaticText    *m_pLblZVector;
     wxStaticText    *m_pColorModeText;
     wxStaticText    *m_pLblColoring;
     wxStaticText    *m_pLblThickness;

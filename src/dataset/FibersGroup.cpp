@@ -298,6 +298,10 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     m_pLblMaxLength   = new wxStaticText( pParent, wxID_ANY, wxT( "Max Length" ) );
     m_pLblSubsampling = new wxStaticText( pParent, wxID_ANY, wxT( "Subsampling" ) );
     m_pLblThickness   = new wxStaticText( pParent, wxID_ANY, wxT( "Thickness" ) );
+	m_pLblAlpha = new wxStaticText( pParent, wxID_ANY, wxT( "Alpha" ) );
+	m_pLblXVector = new wxStaticText( pParent, wxID_ANY, wxT( "X angle" ) );
+	m_pLblYVector = new wxStaticText( pParent, wxID_ANY, wxT( "Y angle" ) );
+	m_pLblZVector = new wxStaticText( pParent, wxID_ANY, wxT( "Z angle" ) );
     m_pLblColoring    = new wxStaticText( pParent, wxID_ANY, wxT( "Coloring" ) );
     m_pSliderFibersFilterMin = new wxSlider( pParent, wxID_ANY, 0,       0, INT_MAX, DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersFilterMax = new wxSlider( pParent, wxID_ANY, INT_MAX, 0, INT_MAX, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
@@ -309,6 +313,10 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
                                              FIBERS_SUBSAMPLING_RANGE_MIN,
                                              FIBERS_SUBSAMPLING_RANGE_MAX,
                                              DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersAlpha  = new wxSlider( pParent, wxID_ANY, 3,       0,     5, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersXVector  = new wxSlider( pParent, wxID_ANY, 0,       0,     180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersYVector  = new wxSlider( pParent, wxID_ANY, 0,       0,     180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersZVector  = new wxSlider( pParent, wxID_ANY, 0,       1,     180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(   pParent, wxID_ANY,  10,  1,  20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pToggleLocalColoring   = new wxToggleButton(   pParent, wxID_ANY, wxT( "Local Coloring" ) );
     m_pToggleNormalColoring  = new wxToggleButton(   pParent, wxID_ANY, wxT( "Color With Overlay" ) );
@@ -353,8 +361,17 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pGridSliders->Add( m_pLblSubsampling, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
     pGridSliders->Add( m_pSliderFibersSampling, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
-    pGridSliders->Add( m_pLblThickness, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
-    pGridSliders->Add( m_pSliderInterFibersThickness, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+    pGridSliders->Add( m_pLblAlpha, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersAlpha, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+	pGridSliders->Add( m_pLblXVector, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersXVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+	pGridSliders->Add( m_pLblYVector, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersYVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
+
+	pGridSliders->Add( m_pLblZVector, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxALL, 1 );
+    pGridSliders->Add( m_pSliderFibersZVector, 0, wxALIGN_LEFT | wxEXPAND | wxALL, 1 );
 
     pBoxMain->Add( pGridSliders, 0, wxEXPAND | wxALL, 2 );
 
@@ -423,6 +440,10 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
     pParent->Connect( m_pSliderFibersFilterMin->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersFilterMax->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
     pParent->Connect( m_pSliderFibersSampling->GetId(),      wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersFilter ) );
+	pParent->Connect( m_pSliderFibersAlpha->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+	pParent->Connect( m_pSliderFibersXVector->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+	pParent->Connect( m_pSliderFibersYVector->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
+	pParent->Connect( m_pSliderFibersZVector->GetId(),     wxEVT_COMMAND_SLIDER_UPDATED,       wxCommandEventHandler( PropertiesWindow::OnFibersAlpha ) );
     pParent->Connect( m_pToggleLocalColoring->GetId(),       wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleLocalColoringBtn ) );
     pParent->Connect( m_pToggleNormalColoring->GetId(),      wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxEventHandler(        PropertiesWindow::OnToggleNormalColoringBtn ) );
     pParent->Connect( m_pApplyDifferentColors->GetId(),      wxEVT_COMMAND_BUTTON_CLICKED,       wxEventHandler(        PropertiesWindow::OnApplyDifferentColors ) );
