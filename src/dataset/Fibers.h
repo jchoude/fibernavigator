@@ -95,6 +95,7 @@ public:
     bool    getFiberCoordValues( int fiberIndex, std::vector< Vector > &fiberPoints );
 
     void    updateFibersFilters();
+    void    updateAlpha();
     void    updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
     std::vector< bool >  getFilteredFibers();
 
@@ -136,6 +137,10 @@ public:
     void    updateToggleLocalColoring( bool val )   { m_pToggleLocalColoring->SetValue( val ); }
     void    updateToggleNormalColoring( bool val )  { m_pToggleNormalColoring->SetValue( val ); }
     void    updateSliderThickness( int val )        { m_pSliderInterFibersThickness->SetValue( val ); }
+    void    updateSliderAlpha( int val )            { m_pSliderFibersAlpha->SetValue( val ); }
+    void    updateSliderXVector( int val )          { m_pSliderFibersXVector->SetValue( val ); }
+    void    updateSliderYVector( int val )          { m_pSliderFibersYVector->SetValue( val ); }
+    void    updateSliderZVector( int val )          { m_pSliderFibersZVector->SetValue( val ); }
 
     // Empty derived methods
     void    drawVectors()      {};
@@ -221,6 +226,8 @@ private:
     Octree                *m_pOctree;
 
     bool            m_cfDrawDirty;
+    bool            m_opDirty;
+    float           m_exponent;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
@@ -239,6 +246,11 @@ private:
     wxSlider       *m_pSliderFibersFilterMax;
     wxSlider       *m_pSliderFibersSampling;
     wxSlider       *m_pSliderInterFibersThickness;
+    wxSlider       *m_pSliderFibersAlpha;
+    wxSlider       *m_pSliderFibersXVector;
+    wxSlider       *m_pSliderFibersYVector;
+    wxSlider       *m_pSliderFibersZVector;
+
     wxToggleButton *m_pToggleLocalColoring;
     wxToggleButton *m_pToggleNormalColoring;
     wxButton       *m_pSelectConstantFibersColor;

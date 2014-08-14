@@ -675,6 +675,58 @@ void PropertiesWindow::OnFibersFilter( wxCommandEvent& WXUNUSED( event ) )
     }
 }
 
+void PropertiesWindow::OnFibersAlpha( wxCommandEvent& WXUNUSED( event ) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFibersFilter" ), LOGLEVEL_DEBUG );
+
+    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListIndex() );
+
+    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
+    if( pTmpFib != NULL )
+    {
+        pTmpFib->updateAlpha();
+    }
+}
+
+void PropertiesWindow::OnFibersXVector( wxCommandEvent& WXUNUSED( event ) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFibersFilter" ), LOGLEVEL_DEBUG );
+
+    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListIndex() );
+
+    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
+    if( pTmpFib != NULL )
+    {
+        pTmpFib->updateAlpha();
+    }
+}
+
+void PropertiesWindow::OnFibersYVector( wxCommandEvent& WXUNUSED( event ) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFibersFilter" ), LOGLEVEL_DEBUG );
+
+    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListIndex() );
+
+    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
+    if( pTmpFib != NULL )
+    {
+        pTmpFib->updateAlpha();
+    }
+}
+
+void PropertiesWindow::OnFibersZVector( wxCommandEvent& WXUNUSED( event ) )
+{
+    Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnFibersFilter" ), LOGLEVEL_DEBUG );
+
+    DatasetIndex index = MyApp::frame->m_pListCtrl->GetItem( MyApp::frame->getCurrentListIndex() );
+
+    Fibers* pTmpFib = DatasetManager::getInstance()->getSelectedFibers( index );
+    if( pTmpFib != NULL )
+    {
+        pTmpFib->updateAlpha();
+    }
+}
+
 void PropertiesWindow::OnGenerateFiberVolume( wxCommandEvent& WXUNUSED(event) )
 {
     Logger::getInstance()->print( wxT( "Event triggered - PropertiesWindow::OnGenerateFiberVolume" ), LOGLEVEL_DEBUG );
