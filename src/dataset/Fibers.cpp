@@ -2825,7 +2825,19 @@ void Fibers::draw()
     // Otherwise, use the drawCrossingFibers
     if ( !SceneManager::getInstance()->isFibersGeomShaderActive() && m_useIntersectedFibers )
     {
-        drawCrossingFibers();
+		if( m_useTransparency )
+		{
+			glPushAttrib( GL_ALL_ATTRIB_BITS );
+			glEnable( GL_BLEND );
+			glBlendFunc( GL_ONE, GL_ONE );
+			glDepthMask( GL_FALSE );
+			drawCrossingFibers();
+			glPopAttrib();
+		}
+		else
+		{
+			drawCrossingFibers();
+		}
         return;
     }
 
