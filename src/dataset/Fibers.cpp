@@ -82,7 +82,7 @@ Fibers::Fibers()
     m_exponent( 3.0f ),
 	m_xAngle( 0.0f ),
 	m_yAngle( 0.0f ),
-	m_zAngle( 1.0f ),
+	m_zAngle( 180.0f ),
     m_axialShown(    SceneManager::getInstance()->isAxialDisplayed() ),
     m_coronalShown(  SceneManager::getInstance()->isCoronalDisplayed() ),
     m_sagittalShown( SceneManager::getInstance()->isSagittalDisplayed() ),
@@ -2819,6 +2819,13 @@ void Fibers::draw()
             glDepthMask( GL_FALSE );
             drawSortedLines();
             glPopAttrib();
+
+			glColor4f(1.0f,1.0f,1.0f,1.0f);
+			glLineWidth(10.0f);
+			glBegin(GL_LINES);
+				glVertex3f( DatasetManager::getInstance()->getColumns()/2, DatasetManager::getInstance()->getRows()/2,DatasetManager::getInstance()->getFrames()/2);
+				glVertex3f( DatasetManager::getInstance()->getColumns()/2 + m_xAngle * 100,DatasetManager::getInstance()->getRows()/2 + m_yAngle * 100,DatasetManager::getInstance()->getFrames()/2 + m_zAngle * 100);
+			glEnd();
         }
         return;
     }
@@ -3131,9 +3138,11 @@ void Fibers::drawSortedLines()
             //zVector.normalize();
 
             Vector zVector = Vector(m_xAngle,m_yAngle,m_zAngle); //Fixed test
+			
 
-            //float alphaValue = std::abs(normalVector.Dot(zVector)); //Opaque
-            float alphaValue = 1-std::abs(normalVector.Dot(zVector)); //Transparent
+
+            float alphaValue = std::abs(normalVector.Dot(zVector)); //Opaque
+            //float alphaValue = 1-std::abs(normalVector.Dot(zVector)); //Transparent
             alphaValue = std::pow(alphaValue,m_exponent);
 
             glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
@@ -3524,7 +3533,7 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
     m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         3,         0,       5, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersXVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersYVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersZVector  = new wxSlider( pParent, wxID_ANY,         1,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+    m_pSliderFibersZVector  = new wxSlider( pParent, wxID_ANY,         180,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 
 #if !_USE_LIGHT_GUI
     wxButton *pBtnGeneratesDensityVolume = new wxButton( pParent, wxID_ANY, wxT( "New Density Volume" ) );
