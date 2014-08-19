@@ -96,6 +96,8 @@ public:
 
     void    updateFibersFilters();
     void    updateAlpha();
+	void    setAxisView(bool value);
+    void    setFuncOpac(bool value);
     void    updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling);
     std::vector< bool >  getFilteredFibers();
 
@@ -155,6 +157,8 @@ public:
 
     // Inherited from DatasetInfo
     bool    toggleShow();
+	bool    getViewRadValue() { return m_pRadAxisView->GetValue(); }
+	bool    getFuncValue() { return m_pRadFuncOpac->GetValue(); }
 
 private:
     Fibers( const Fibers & );
@@ -191,6 +195,7 @@ private:
 
     void            setShader();
     void            releaseShader();
+	
 
 private:
     // Variables
@@ -230,6 +235,8 @@ private:
 	float           m_xAngle;
 	float           m_yAngle;
 	float           m_zAngle;
+	bool            m_axisView;
+	bool			m_funcOpac;
     bool            m_axialShown;
     bool            m_coronalShown;
     bool            m_sagittalShown;
@@ -263,6 +270,8 @@ private:
     wxRadioButton  *m_pRadCurvature;
     wxRadioButton  *m_pRadTorsion;
     wxRadioButton  *m_pRadConstant;
+	wxToggleButton  *m_pRadAxisView;
+	wxToggleButton  *m_pRadFuncOpac;
 };
 
 #endif /* FIBERS_H_ */
