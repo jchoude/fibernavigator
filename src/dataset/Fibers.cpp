@@ -3152,19 +3152,21 @@ void Fibers::drawSortedLines()
 			float alphaValue;
 			if(m_funcOpac)
 			{
-				alphaValue = std::abs(normalVector.Dot(zVector)); //Opaque
+				alphaValue = 1-std::abs(normalVector.Dot(zVector)); //Transparent
 			}
 			else
 			{
-				alphaValue = 1-std::abs(normalVector.Dot(zVector)); //Transparent
+				alphaValue = std::abs(normalVector.Dot(zVector)); //Opaque
 			}
 
             alphaValue = std::pow(alphaValue,m_exponent);
 
-            glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
+            //glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
+			glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
             glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
             glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
-            glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   alphaValue );
+            //glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   alphaValue );
+			glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
             glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
             glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
 
@@ -3465,9 +3467,9 @@ void Fibers::setFuncOpac(bool value)
 {
 	m_funcOpac = !value;
 	if(value)
-		m_pRadFuncOpac->SetLabel( wxT("Opacity mode") );
-	else
 		m_pRadFuncOpac->SetLabel( wxT("Transparent mode") );
+	else
+		m_pRadFuncOpac->SetLabel( wxT("Opacity mode") );
 }
 
 void Fibers::updateFibersFilters(int minLength, int maxLength, int minSubsampling, int maxSubsampling)
