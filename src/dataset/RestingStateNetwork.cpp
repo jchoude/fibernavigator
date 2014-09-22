@@ -384,6 +384,27 @@ void RestingStateNetwork::seedBased()
 	RTFMRIHelper::getInstance()->setRTFMRIDirty(false);
 }
 
+namespace
+{
+template< class T > struct IndirectComp
+{
+    IndirectComp( const T &zvals ) :
+        zvals( zvals )
+    {
+    }
+
+    // Watch out: operator less, but we are sorting in descending z-order, i.e.,
+    // highest z value will be first in array and painted first as well
+    template< class I > bool operator()( const I &i1, const I &i2 ) const
+    {
+        return zvals[i1] > zvals[i2];
+    }
+
+private:
+    const T &zvals;
+};
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 //Rendering function, for both 3D sprites and textures options.
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -392,10 +413,36 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 	if( m_3Dpoints.size() > 0 )
     {
 		std::vector<float> texture(m_datasetSizeL*3, 0.0f);
-		
+
+
+        ////Test Sort////
+        GLfloat projMatrix[16];
+        glGetFloatv( GL_PROJECTION_MATRIX, projMatrix );
+        size_t siz = m_3Dpoints.size();
+
+    
+        // Compute z values of lines (in our case: starting points only).
+        vector< float > zVals( siz );
+
+
+        unsigned int *pSnippletSort = NULL;
+        pSnippletSort = new unsigned int[siz + 1];
+      
+
+        for( int i = 0; i < siz; ++i )
+        {
+            zVals[i] = ( m_3Dpoints[i].first.x * projMatrix[2] + m_3Dpoints[i].first.y * projMatrix[6]
+                          + m_3Dpoints[i].first.z * projMatrix[10] + projMatrix[14] ) / ( m_3Dpoints[i].first.x * projMatrix[3]
+                                  + m_3Dpoints[i].first.y * projMatrix[7] + m_3Dpoints[i].first.z * projMatrix[11] + projMatrix[15] );
+            pSnippletSort[i] = i;
+        }
+
+        sort( &pSnippletSort[0], &pSnippletSort[siz], IndirectComp< vector< float > > ( zVals ) );
+
 		//Apply ColorMap
-		for (unsigned int s = 0; s < m_3Dpoints.size(); s++)
+		for (unsigned int ii = 0; ii < m_3Dpoints.size(); ii++)
 		{
+            unsigned int s = pSnippletSort[ii]; //id to render by Z
 			float R,G,B;
             bool render = true;
 
@@ -493,8 +540,10 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 			pNewAnatomy->generateTexture();
 
 		}
+        delete[] pSnippletSort;
 	}
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //Correlation function given a position, with all other time series

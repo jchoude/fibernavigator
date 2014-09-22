@@ -3161,14 +3161,17 @@ void Fibers::drawSortedLines()
 
             alphaValue = std::pow(alphaValue,m_exponent);
 
-            //glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
-			glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
-            glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
-            glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
-            //glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   alphaValue );
-			glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
-            glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
-            glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
+            if(alphaValue > 0.1f)
+            {
+                //glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   alphaValue );
+		        glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
+                glNormal3f( pNormals[idx3 + 0],      pNormals[idx3 + 1],      pNormals[idx3 + 2] );
+                glVertex3f( m_pointArray[idx3 + 0],  m_pointArray[idx3 + 1],  m_pointArray[idx3 + 2] );
+                //glColor4f(  pColors[id23 + 0],       pColors[id23 + 1],       pColors[id23 + 2],   alphaValue );
+		        glColor4f(  normalVector.x, normalVector.y, normalVector.z,   alphaValue );
+                glNormal3f( pNormals[id23 + 0],      pNormals[id23 + 1],      pNormals[id23 + 2] );
+                glVertex3f( m_pointArray[id23 + 0],  m_pointArray[id23 + 1],  m_pointArray[id23 + 2] );
+            }
 
 
             /*glColor4f(  pColors[idx3 + 0],       pColors[idx3 + 1],       pColors[idx3 + 2],   m_alpha );
@@ -3448,7 +3451,7 @@ void Fibers::updateFibersFilters()
 
 void Fibers::updateAlpha()
 {
-    m_exponent = m_pSliderFibersAlpha->GetValue();
+    m_exponent = m_pSliderFibersAlpha->GetValue() / 10.0f;
 	m_xAngle = m_pSliderFibersXVector->GetValue() / 180.0f;
 	m_yAngle = m_pSliderFibersYVector->GetValue() / 180.0f;
 	m_zAngle = m_pSliderFibersZVector->GetValue() / 180.0f;
@@ -3566,8 +3569,8 @@ void Fibers::createPropertiesSizer( PropertiesWindow *pParent )
                                             FIBERS_SUBSAMPLING_RANGE_MAX ,
                                             DEF_POS, DEF_SIZE, wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderInterFibersThickness = new wxSlider(  pParent, wxID_ANY, m_thickness * 4, 1, 20, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-    m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         3,         0,       5, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
-	m_pSliderFibersAlpha->SetValue( 3.0f );
+    m_pSliderFibersAlpha     = new wxSlider( pParent, wxID_ANY,         30,         0,       70, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersAlpha->SetValue( 30.0f );
     m_pSliderFibersXVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersYVector  = new wxSlider( pParent, wxID_ANY,         0,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
     m_pSliderFibersZVector  = new wxSlider( pParent, wxID_ANY,         180,         0,       180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );

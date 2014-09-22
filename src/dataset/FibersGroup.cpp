@@ -314,6 +314,7 @@ void FibersGroup::createPropertiesSizer( PropertiesWindow *pParent )
                                              FIBERS_SUBSAMPLING_RANGE_MAX,
                                              DEF_POS, wxSize( 140, -1 ), wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderFibersAlpha  = new wxSlider( pParent, wxID_ANY, 3,       0,     5, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
+	m_pSliderFibersAlpha  = new wxSlider( pParent, wxID_ANY, 30,       0,     50, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderFibersXVector  = new wxSlider( pParent, wxID_ANY, 0,       0,     180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderFibersYVector  = new wxSlider( pParent, wxID_ANY, 0,       0,     180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
 	m_pSliderFibersZVector  = new wxSlider( pParent, wxID_ANY, 0,       1,     180, DEF_POS, DEF_SIZE,         wxSL_HORIZONTAL | wxSL_AUTOTICKS );
