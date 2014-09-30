@@ -507,39 +507,39 @@ void RestingStateNetwork::render3D(bool recalculateTexture)
 
 
 		//TEXTURE
-		if(recalculateTexture)
-		{
+		//if(recalculateTexture)
+		//{
 
-			for(int x = 0; x < m_columnsL; x++)
-			{
-				for(int y = 0; y < m_rowsL; y++)
-				{
-					for(int z = 0; z < m_framesL; z++)
-					{
-						int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
+		//	for(int x = 0; x < m_columnsL; x++)
+		//	{
+		//		for(int y = 0; y < m_rowsL; y++)
+		//		{
+		//			for(int z = 0; z < m_framesL; z++)
+		//			{
+		//				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
 
-						int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-						int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-						int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+		//				int zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+		//				int yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+		//				int xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
 
-						if(xx >=0 && yy >=0 && zz >=0 && xx < m_columns && yy < m_rows && zz < m_frames)
-						{
-							int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
+		//				if(xx >=0 && yy >=0 && zz >=0 && xx < m_columns && yy < m_rows && zz < m_frames)
+		//				{
+		//					int s = zz * m_columns * m_rows + yy * m_columns + xx ; // O
 
-							texture[i*3] = m_smallt[s*3];
-							texture[i*3 + 1] = m_smallt[s*3+1];
-							texture[i*3 + 2] = m_smallt[s*3+2];
-						}
+		//					texture[i*3] = m_smallt[s*3];
+		//					texture[i*3 + 1] = m_smallt[s*3+1];
+		//					texture[i*3 + 2] = m_smallt[s*3+2];
+		//				}
 
-					}
-				}
-			}
+		//			}
+		//		}
+		//	}
 
-			Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
-			pNewAnatomy->setFloatDataset(texture);
-			pNewAnatomy->generateTexture();
+		//	Anatomy* pNewAnatomy = (Anatomy *)DatasetManager::getInstance()->getDataset( m_index );
+		//	pNewAnatomy->setFloatDataset(texture);
+		//	pNewAnatomy->generateTexture();
 
-		}
+		//}
         delete[] pSnippletSort;
 	}
 }
