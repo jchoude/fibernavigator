@@ -539,6 +539,7 @@ void TheScene::renderMesh()
     ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "showFS", true );
     ShaderHelper::getInstance()->getMeshShader()->setUniInt  ( "useTex", false );
     ShaderHelper::getInstance()->getMeshShader()->setUniFloat( "alpha_", 1.0 );
+    ShaderHelper::getInstance()->getMeshShader()->setUniInt( "useColorMap", SceneManager::getInstance()->getColorMap() );
 
     //Render meshes
     vector< Mesh * > v = DatasetManager::getInstance()->getMeshes();
