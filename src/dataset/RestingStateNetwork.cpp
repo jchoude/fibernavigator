@@ -33,6 +33,8 @@
 //#include "../gfx/TextureHandling.h"
 #include "../main.h"
 
+#include <iostream>
+
 //////////////////////////////////////////
 //Constructor
 //////////////////////////////////////////
@@ -61,9 +63,10 @@ m_origin(0,0,0)
 	m_datasetSizeL = m_rowsL * m_columnsL * m_framesL;
 
 	FMatrix &t = DatasetManager::getInstance()->getNiftiTransform();
-	m_originL.x = floor(abs(t(0,3)) / m_xL);
-	m_originL.y = floor(abs(t(1,3)) / m_yL);
-	m_originL.z = floor(abs(t(2,3)) / m_zL);
+	m_originL.x = t(0,3) / m_xL;
+	m_originL.y = t(1,3) / m_yL;
+	m_originL.z = t(2,3) / m_zL;
+  std::cout << "OriginL: " << m_originL.x << ", " << m_originL.y << ", " << m_originL.z << std::endl;
 }
 
 //////////////////////////////////////////
@@ -92,9 +95,12 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 
 	if( pHeader->sform_code > 0 )//Test manual convert from a poiint to fmri to see if works (e.g. from t1 csf to fmri csf with ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
     {
-		m_origin.x = floor(pHeader->sto_ijk.m[0][3]);
-		m_origin.y = floor(pHeader->sto_ijk.m[1][3]);
-		m_origin.z = floor(pHeader->sto_ijk.m[2][3]);
+		m_origin.x = pHeader->sto_xyz.m[0][3];
+		m_origin.y = pHeader->sto_xyz.m[1][3];
+		m_origin.z = pHeader->sto_xyz.m[2][3];
+    std::cout << "Origin: " << m_origin.x << ", " << m_origin.y << ", " << m_origin.z << std::endl;
+
+    std::cout << "Origin: " << pHeader->sto_xyz.m[0][3] << ", " << pHeader->sto_xyz.m[1][3] << ", " << pHeader->sto_xyz.m[2][3] << std::endl;
     }
     else if( pHeader->qform_code > 0 )
     {
@@ -181,11 +187,13 @@ bool RestingStateNetwork::load( nifti_image *pHeader, nifti_image *pBody )
 
     if( m_originalAxialOrientation == 0 )
     { 
-        flipAnat( X_AXIS );     
+        flipAnat( X_AXIS );
+        std::cout << "Flipping x";     
     }
     if( m_originalSagOrientation == 0 )
     {
         flipAnat( Y_AXIS );
+        std::cout << "fllipping Y";
     }
     //Logger::getInstance()->print( wxT( "Resting-state network initialized" ), LOGLEVEL_MESSAGE );
     return true;
@@ -318,6 +326,9 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 {
 	std::vector<float> vol(m_datasetSizeL* 3, 0.0f);
 
+  float xOff = m_origin.x - m_originL.x;
+  float yOff = m_origin.y - m_originL.y;
+  float zOff = m_origin.z - m_originL.z;
 	for(int x = 0; x < m_columnsL; x++)
 	{
 		for(int y = 0; y < m_rowsL; y++)
@@ -326,9 +337,12 @@ void RestingStateNetwork::SetTextureFromSlider(int sliderValue)
 			{
 				int i = z * m_columnsL * m_rowsL + y *m_columnsL + x;
 
-				float zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
-				float yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
-				float xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+				//float zz = ((z - m_originL.z) * m_zL / m_voxelSizeZ) + m_origin.z;
+				//float yy = ((y - m_originL.y) * m_yL / m_voxelSizeY) + m_origin.y;
+				//float xx = ((x - m_originL.x) * m_xL / m_voxelSizeX) + m_origin.x;
+        float xx = (x - xOff) / m_voxelSizeX;
+        float yy = (y - yOff) / m_voxelSizeY;
+        float zz = (z - zOff) / m_voxelSizeZ;
 
 				if(xx >1 && yy >1 && zz >1 && xx < m_columns && yy < m_rows && zz < m_frames)
 				{
